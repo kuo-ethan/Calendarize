@@ -11,13 +11,23 @@ import EventKit
 import EventKitUI
 
 final class HomeVC: DayViewController, EKEventEditViewDelegate {
+    
     private var eventStore = EKEventStore()
+    
+    static var shared: HomeVC!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Home"
+        
+        let profileButton = UIBarButtonItem(image: UIImage(systemName: "person"), style: .plain, target: self, action: #selector(didTapProfile))
+        navigationItem.rightBarButtonItem = profileButton
+        let refreshButton = UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), style: .plain, target: self, action: #selector(didTapRefresh))
+        navigationItem.leftBarButtonItem = refreshButton
+        
         // The app must have access to the user's calendar to show the events on the timeline
         requestAccessToCalendar()
+        
         // Subscribe to notifications to reload the UI when
         subscribeToNotifications()
         
@@ -180,5 +190,31 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         endEventEditing()
         reloadData()
         controller.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc private func didTapProfile() {
+        navigationController?.pushViewController(ProfileVC(), animated: true)
+    }
+    
+    @objc private func didTapRefresh() {
+        Authentication.shared.currentUser!.ckEvents = calendarize()
+        reloadData()
+    }
+    
+    // MARK: The main algorithm. Given EKEvents, commitments, tasks, start and end date, return CKEvents list
+    private func calendarize() -> [CKEvent] {
+        // MARK: Setup
+        var ckEvents: [CKEvent] = []
+        // let startDate = ____ // round up to nearest multiple of 5
+        // let endDate = ____ // last deadline
+        // let ekEvents = eventStore...
+        
+        // MARK: Preprocesing
+        
+        // MARK: DP Algorithm
+        
+        // MARK: Postprocessing
+        
+        return ckEvents
     }
 }

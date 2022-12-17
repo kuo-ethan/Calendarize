@@ -14,6 +14,41 @@
 		CBAB2CDF294A921A001876DD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAB2CDD294A921A001876DD /* LaunchScreen.storyboard */; };
 		CBAB2CEB294A949E001876DD /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CEA294A949E001876DD /* CalendarKit */; };
 		CBAB2CED294A96FC001876DD /* EKWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CEC294A96FC001876DD /* EKWrapper.swift */; };
+		CBAB2CEF294A9A5C001876DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */; };
+		CBAB2CF3294AD92C001876DD /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF2294AD92C001876DD /* FirebaseAnalytics */; };
+		CBAB2CF5294AD92C001876DD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF4294AD92C001876DD /* FirebaseAuth */; };
+		CBAB2CF7294AD92C001876DD /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF6294AD92C001876DD /* FirebaseFirestore */; };
+		CBAB2CFB294AE588001876DD /* UIColor+ColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CFA294AE588001876DD /* UIColor+ColorScheme.swift */; };
+		CBAB2CFD294AE59E001876DD /* UIColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CFC294AE59E001876DD /* UIColor+Hex.swift */; };
+		CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CFE294AE5F2001876DD /* UIViewController+HideKeyboard.swift */; };
+		CBAB2D01294AE6F2001876DD /* ContentLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D00294AE6F2001876DD /* ContentLabel.swift */; };
+		CBAB2D03294AE984001876DD /* MediumLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D02294AE984001876DD /* MediumLabel.swift */; };
+		CBAB2D05294AE9E4001876DD /* TimeStepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D04294AE9E4001876DD /* TimeStepperView.swift */; };
+		CBAB2D07294AEAA6001876DD /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D06294AEAA6001876DD /* Utility.swift */; };
+		CBAB2D09294AEB51001876DD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D08294AEB51001876DD /* User.swift */; };
+		CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0A294AEBE8001876DD /* Task.swift */; };
+		CBAB2D0D294AEE8C001876DD /* HabitInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */; };
+		CBAB2D0F294AEEA9001876DD /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0E294AEEA9001876DD /* Habit.swift */; };
+		CBAB2D14294AEECC001876DD /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D13294AEECC001876DD /* Database.swift */; };
+		CBAB2D17294AEF0B001876DD /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D16294AEF0B001876DD /* Authentication.swift */; };
+		CBAB2D19294AEF46001876DD /* DayInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D18294AEF46001876DD /* DayInterval.swift */; };
+		CBAB2D1B294BA3AC001876DD /* CKWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D1A294BA3AC001876DD /* CKWrapper.swift */; };
+		CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D1C294BB134001876DD /* SignInVC.swift */; };
+		CBAB2D1F294BB13E001876DD /* SignUpVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D1E294BB13E001876DD /* SignUpVC.swift */; };
+		CBAB2D21294BB16F001876DD /* LabeledTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D20294BB16F001876DD /* LabeledTextField.swift */; };
+		CBAB2D23294BB19A001876DD /* HorizontalActionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D22294BB19A001876DD /* HorizontalActionLabel.swift */; };
+		CBAB2D25294BB24F001876DD /* TitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D24294BB24F001876DD /* TitleLabel.swift */; };
+		CBAB2D28294BB2E6001876DD /* NotificationBannerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2D27294BB2E6001876DD /* NotificationBannerSwift */; };
+		CBAB2D2A294BB451001876DD /* LoadingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D29294BB451001876DD /* LoadingButton.swift */; };
+		CBAB2D2C294BB4E2001876DD /* TabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D2B294BB4E2001876DD /* TabBarVC.swift */; };
+		CBAB2D2E294BB5D9001876DD /* TasksVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D2D294BB5D9001876DD /* TasksVC.swift */; };
+		CBAB2D31294BB682001876DD /* EzPopup in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2D30294BB682001876DD /* EzPopup */; };
+		CBAB2D33294BB700001876DD /* TaskEditorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D32294BB700001876DD /* TaskEditorVC.swift */; };
+		CBAB2D36294BCEB8001876DD /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2D35294BCEB8001876DD /* FirebaseFirestoreSwift */; };
+		CBAB2D38294BCFD2001876DD /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D37294BCFD2001876DD /* ProfileVC.swift */; };
+		CBAB2D3A294BD1E5001876DD /* HabitsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D39294BD1E5001876DD /* HabitsVC.swift */; };
+		CBAB2D3C294BD237001876DD /* HabitEditorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */; };
+		CBAB2D3F294BD284001876DD /* TagListView in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2D3E294BD284001876DD /* TagListView */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +60,35 @@
 		CBAB2CDE294A921A001876DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBAB2CE0294A921A001876DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBAB2CEC294A96FC001876DD /* EKWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EKWrapper.swift; sourceTree = "<group>"; };
+		CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CBAB2CF0294A9AA1001876DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CBAB2CFA294AE588001876DD /* UIColor+ColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+ColorScheme.swift"; sourceTree = "<group>"; };
+		CBAB2CFC294AE59E001876DD /* UIColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Hex.swift"; sourceTree = "<group>"; };
+		CBAB2CFE294AE5F2001876DD /* UIViewController+HideKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+HideKeyboard.swift"; sourceTree = "<group>"; };
+		CBAB2D00294AE6F2001876DD /* ContentLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLabel.swift; sourceTree = "<group>"; };
+		CBAB2D02294AE984001876DD /* MediumLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediumLabel.swift; sourceTree = "<group>"; };
+		CBAB2D04294AE9E4001876DD /* TimeStepperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeStepperView.swift; sourceTree = "<group>"; };
+		CBAB2D06294AEAA6001876DD /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
+		CBAB2D08294AEB51001876DD /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		CBAB2D0A294AEBE8001876DD /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitInstance.swift; sourceTree = "<group>"; };
+		CBAB2D0E294AEEA9001876DD /* Habit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Habit.swift; sourceTree = "<group>"; };
+		CBAB2D13294AEECC001876DD /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
+		CBAB2D16294AEF0B001876DD /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
+		CBAB2D18294AEF46001876DD /* DayInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayInterval.swift; sourceTree = "<group>"; };
+		CBAB2D1A294BA3AC001876DD /* CKWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKWrapper.swift; sourceTree = "<group>"; };
+		CBAB2D1C294BB134001876DD /* SignInVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInVC.swift; sourceTree = "<group>"; };
+		CBAB2D1E294BB13E001876DD /* SignUpVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpVC.swift; sourceTree = "<group>"; };
+		CBAB2D20294BB16F001876DD /* LabeledTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabeledTextField.swift; sourceTree = "<group>"; };
+		CBAB2D22294BB19A001876DD /* HorizontalActionLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalActionLabel.swift; sourceTree = "<group>"; };
+		CBAB2D24294BB24F001876DD /* TitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleLabel.swift; sourceTree = "<group>"; };
+		CBAB2D29294BB451001876DD /* LoadingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButton.swift; sourceTree = "<group>"; };
+		CBAB2D2B294BB4E2001876DD /* TabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarVC.swift; sourceTree = "<group>"; };
+		CBAB2D2D294BB5D9001876DD /* TasksVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksVC.swift; sourceTree = "<group>"; };
+		CBAB2D32294BB700001876DD /* TaskEditorVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskEditorVC.swift; sourceTree = "<group>"; };
+		CBAB2D37294BCFD2001876DD /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
+		CBAB2D39294BD1E5001876DD /* HabitsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsVC.swift; sourceTree = "<group>"; };
+		CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitEditorVC.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +96,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBAB2D31294BB682001876DD /* EzPopup in Frameworks */,
+				CBAB2CF3294AD92C001876DD /* FirebaseAnalytics in Frameworks */,
+				CBAB2CF7294AD92C001876DD /* FirebaseFirestore in Frameworks */,
+				CBAB2D36294BCEB8001876DD /* FirebaseFirestoreSwift in Frameworks */,
+				CBAB2CF5294AD92C001876DD /* FirebaseAuth in Frameworks */,
+				CBAB2D28294BB2E6001876DD /* NotificationBannerSwift in Frameworks */,
+				CBAB2D3F294BD284001876DD /* TagListView in Frameworks */,
 				CBAB2CEB294A949E001876DD /* CalendarKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -42,8 +113,10 @@
 		CBAB2CC6294A9218001876DD = {
 			isa = PBXGroup;
 			children = (
+				CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */,
 				CBAB2CD1294A9218001876DD /* Calendarize */,
 				CBAB2CD0294A9218001876DD /* Products */,
+				CBAB2D34294BCEB8001876DD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -66,6 +139,7 @@
 				CBAB2CDB294A921A001876DD /* Assets.xcassets */,
 				CBAB2CDD294A921A001876DD /* LaunchScreen.storyboard */,
 				CBAB2CE0294A921A001876DD /* Info.plist */,
+				CBAB2CF0294A9AA1001876DD /* GoogleService-Info.plist */,
 			);
 			path = Calendarize;
 			sourceTree = "<group>";
@@ -74,6 +148,15 @@
 			isa = PBXGroup;
 			children = (
 				CBAB2CEC294A96FC001876DD /* EKWrapper.swift */,
+				CBAB2D1A294BA3AC001876DD /* CKWrapper.swift */,
+				CBAB2D06294AEAA6001876DD /* Utility.swift */,
+				CBAB2D08294AEB51001876DD /* User.swift */,
+				CBAB2D0E294AEEA9001876DD /* Habit.swift */,
+				CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */,
+				CBAB2D0A294AEBE8001876DD /* Task.swift */,
+				CBAB2D18294AEF46001876DD /* DayInterval.swift */,
+				CBAB2D13294AEECC001876DD /* Database.swift */,
+				CBAB2D16294AEF0B001876DD /* Authentication.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -81,6 +164,14 @@
 		CBAB2CE7294A93C7001876DD /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				CBAB2D02294AE984001876DD /* MediumLabel.swift */,
+				CBAB2D04294AE9E4001876DD /* TimeStepperView.swift */,
+				CBAB2D00294AE6F2001876DD /* ContentLabel.swift */,
+				CBAB2D20294BB16F001876DD /* LabeledTextField.swift */,
+				CBAB2D22294BB19A001876DD /* HorizontalActionLabel.swift */,
+				CBAB2D29294BB451001876DD /* LoadingButton.swift */,
+				CBAB2D24294BB24F001876DD /* TitleLabel.swift */,
+				CBAB2CF9294AE558001876DD /* Extensions */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -88,9 +179,42 @@
 		CBAB2CE8294A93CB001876DD /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				CBAB2D2B294BB4E2001876DD /* TabBarVC.swift */,
 				CBAB2CD6294A9218001876DD /* HomeVC.swift */,
+				CBAB2D2D294BB5D9001876DD /* TasksVC.swift */,
+				CBAB2D32294BB700001876DD /* TaskEditorVC.swift */,
+				CBAB2D37294BCFD2001876DD /* ProfileVC.swift */,
+				CBAB2D39294BD1E5001876DD /* HabitsVC.swift */,
+				CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */,
+				CBAB2CF8294ADBB9001876DD /* Onboarding */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		CBAB2CF8294ADBB9001876DD /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				CBAB2D1C294BB134001876DD /* SignInVC.swift */,
+				CBAB2D1E294BB13E001876DD /* SignUpVC.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		CBAB2CF9294AE558001876DD /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				CBAB2CFA294AE588001876DD /* UIColor+ColorScheme.swift */,
+				CBAB2CFC294AE59E001876DD /* UIColor+Hex.swift */,
+				CBAB2CFE294AE5F2001876DD /* UIViewController+HideKeyboard.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		CBAB2D34294BCEB8001876DD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -111,6 +235,13 @@
 			name = Calendarize;
 			packageProductDependencies = (
 				CBAB2CEA294A949E001876DD /* CalendarKit */,
+				CBAB2CF2294AD92C001876DD /* FirebaseAnalytics */,
+				CBAB2CF4294AD92C001876DD /* FirebaseAuth */,
+				CBAB2CF6294AD92C001876DD /* FirebaseFirestore */,
+				CBAB2D27294BB2E6001876DD /* NotificationBannerSwift */,
+				CBAB2D30294BB682001876DD /* EzPopup */,
+				CBAB2D35294BCEB8001876DD /* FirebaseFirestoreSwift */,
+				CBAB2D3E294BD284001876DD /* TagListView */,
 			);
 			productName = Calendarize;
 			productReference = CBAB2CCF294A9218001876DD /* Calendarize.app */;
@@ -142,6 +273,10 @@
 			mainGroup = CBAB2CC6294A9218001876DD;
 			packageReferences = (
 				CBAB2CE9294A949E001876DD /* XCRemoteSwiftPackageReference "CalendarKit" */,
+				CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				CBAB2D26294BB2E6001876DD /* XCRemoteSwiftPackageReference "NotificationBanner" */,
+				CBAB2D2F294BB682001876DD /* XCRemoteSwiftPackageReference "EzPopup" */,
+				CBAB2D3D294BD283001876DD /* XCRemoteSwiftPackageReference "TagListView" */,
 			);
 			productRefGroup = CBAB2CD0294A9218001876DD /* Products */;
 			projectDirPath = "";
@@ -159,6 +294,7 @@
 			files = (
 				CBAB2CDF294A921A001876DD /* LaunchScreen.storyboard in Resources */,
 				CBAB2CDC294A921A001876DD /* Assets.xcassets in Resources */,
+				CBAB2CEF294A9A5C001876DD /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -169,10 +305,37 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBAB2D01294AE6F2001876DD /* ContentLabel.swift in Sources */,
+				CBAB2D3A294BD1E5001876DD /* HabitsVC.swift in Sources */,
+				CBAB2D19294AEF46001876DD /* DayInterval.swift in Sources */,
+				CBAB2D2A294BB451001876DD /* LoadingButton.swift in Sources */,
+				CBAB2D38294BCFD2001876DD /* ProfileVC.swift in Sources */,
+				CBAB2D0F294AEEA9001876DD /* Habit.swift in Sources */,
+				CBAB2CFB294AE588001876DD /* UIColor+ColorScheme.swift in Sources */,
+				CBAB2D23294BB19A001876DD /* HorizontalActionLabel.swift in Sources */,
 				CBAB2CD7294A9218001876DD /* HomeVC.swift in Sources */,
+				CBAB2D07294AEAA6001876DD /* Utility.swift in Sources */,
+				CBAB2D33294BB700001876DD /* TaskEditorVC.swift in Sources */,
+				CBAB2D2C294BB4E2001876DD /* TabBarVC.swift in Sources */,
+				CBAB2D05294AE9E4001876DD /* TimeStepperView.swift in Sources */,
+				CBAB2D1F294BB13E001876DD /* SignUpVC.swift in Sources */,
+				CBAB2D03294AE984001876DD /* MediumLabel.swift in Sources */,
 				CBAB2CD3294A9218001876DD /* AppDelegate.swift in Sources */,
+				CBAB2D1B294BA3AC001876DD /* CKWrapper.swift in Sources */,
+				CBAB2D17294AEF0B001876DD /* Authentication.swift in Sources */,
+				CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */,
+				CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */,
+				CBAB2D2E294BB5D9001876DD /* TasksVC.swift in Sources */,
+				CBAB2D09294AEB51001876DD /* User.swift in Sources */,
+				CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */,
+				CBAB2D3C294BD237001876DD /* HabitEditorVC.swift in Sources */,
+				CBAB2D0D294AEE8C001876DD /* HabitInstance.swift in Sources */,
+				CBAB2CFD294AE59E001876DD /* UIColor+Hex.swift in Sources */,
 				CBAB2CD5294A9218001876DD /* SceneDelegate.swift in Sources */,
+				CBAB2D14294AEECC001876DD /* Database.swift in Sources */,
+				CBAB2D25294BB24F001876DD /* TitleLabel.swift in Sources */,
 				CBAB2CED294A96FC001876DD /* EKWrapper.swift in Sources */,
+				CBAB2D21294BB16F001876DD /* LabeledTextField.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +555,38 @@
 				kind = branch;
 			};
 		};
+		CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		CBAB2D26294BB2E6001876DD /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Daltron/NotificationBanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		CBAB2D2F294BB682001876DD /* XCRemoteSwiftPackageReference "EzPopup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huynguyencong/EzPopup";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		CBAB2D3D294BD283001876DD /* XCRemoteSwiftPackageReference "TagListView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ElaWorkshop/TagListView";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -399,6 +594,41 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CBAB2CE9294A949E001876DD /* XCRemoteSwiftPackageReference "CalendarKit" */;
 			productName = CalendarKit;
+		};
+		CBAB2CF2294AD92C001876DD /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		CBAB2CF4294AD92C001876DD /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		CBAB2CF6294AD92C001876DD /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		CBAB2D27294BB2E6001876DD /* NotificationBannerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2D26294BB2E6001876DD /* XCRemoteSwiftPackageReference "NotificationBanner" */;
+			productName = NotificationBannerSwift;
+		};
+		CBAB2D30294BB682001876DD /* EzPopup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2D2F294BB682001876DD /* XCRemoteSwiftPackageReference "EzPopup" */;
+			productName = EzPopup;
+		};
+		CBAB2D35294BCEB8001876DD /* FirebaseFirestoreSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2CF1294AD92C001876DD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestoreSwift;
+		};
+		CBAB2D3E294BD284001876DD /* TagListView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBAB2D3D294BD283001876DD /* XCRemoteSwiftPackageReference "TagListView" */;
+			productName = TagListView;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
