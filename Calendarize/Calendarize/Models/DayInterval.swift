@@ -37,4 +37,9 @@ struct Time: Codable {
             hour = hr
         }
     }
+    
+    init(hour: Int, minutes: Int) {
+        self.hour = hour
+        self.minutes = minutes
+    }
 }

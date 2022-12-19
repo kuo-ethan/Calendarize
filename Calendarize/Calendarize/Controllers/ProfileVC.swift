@@ -19,21 +19,24 @@ class ProfileVC: UIViewController {
     
     private let emailValueLabel = ContentLabel(withText: "", ofSize: DEFAULT_FONT_SIZE-1)
     
-    private let habitsActionLabel: HorizontalActionLabel = {
-        let actionLabel = HorizontalActionLabel(
-            label: "Update your habits ",
-            buttonTitle: "here")
-        
-        actionLabel.translatesAutoresizingMaskIntoConstraints = false
-        return actionLabel
+    private let tableView: UITableView = {
+        let tv = UITableView()
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
     }()
     
     private let contentEdgeInset = UIEdgeInsets(top: 120, left: 40, bottom: 30, right: 40)
+    
+    
+    private let CELLS = ["Preferences", "Statistics", "Update habits"]
     
     // Add button for editing habits list
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.delegate = self
+        tableView.dataSource = self
         
         view.backgroundColor = .background
         title = "Profile"
@@ -48,9 +51,9 @@ class ProfileVC: UIViewController {
         view.addSubview(nameValueLabel)
         view.addSubview(emailLabel)
         view.addSubview(emailValueLabel)
-        view.addSubview(habitsActionLabel)
+        view.addSubview(tableView)
         
-        if let fullname = Authentication.shared.currentUser?.fullname {
+        if let fullname = Authentication.shared.currentUser?.fullName {
             nameValueLabel.text = fullname
         }
         
@@ -71,15 +74,13 @@ class ProfileVC: UIViewController {
             emailLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             emailValueLabel.centerYAnchor.constraint(equalTo: emailLabel.centerYAnchor),
             emailValueLabel.leadingAnchor.constraint(equalTo: emailLabel.trailingAnchor, constant: 5),
-            habitsActionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            habitsActionLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.heightAnchor.constraint(equalToConstant: 150)
         ])
         
-        habitsActionLabel.addTarget(self, action: #selector(didTapUpdateHabits), for: .touchUpInside)
-    }
-    
-    @objc func didTapUpdateHabits() {
-        navigationController?.pushViewController(HabitsVC(), animated: true)
     }
     
     @objc func didTapBackButton() {
@@ -99,4 +100,36 @@ class ProfileVC: UIViewController {
         let duration: TimeInterval = 0.3
         UIView.transition(with: window, duration: duration, options: options, animations: {}, completion: nil)
     }
+}
+
+extension ProfileVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.item == 0 {
+            navigationController?.pushViewController(PreferencesVC(), animated: true)
+        } else if indexPath.item == 1 {
+            navigationController?.pushViewController(StatisticsVC(), animated: true)
+        } else if indexPath.item == 2 {
+            navigationController?.pushViewController(HabitsVC(), animated: true)
+        }
+    }
+}
+
+extension ProfileVC: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return CELLS.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell()
+        cell.selectionStyle = .none
+        let arrowImage = UIImageView(image: UIImage(systemName: "greaterthan"))
+        arrowImage.frame = CGRect(x: 0, y: 0, width: 8, height: 13)
+        cell.accessoryView = arrowImage
+        var content = cell.defaultContentConfiguration()
+        content.text = CELLS[indexPath.item]
+        cell.contentConfiguration = content
+        return cell
+    }
+    
 }

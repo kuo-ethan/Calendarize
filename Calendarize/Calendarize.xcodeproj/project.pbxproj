@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB02DFEF2950EEA50008AB44 /* PreferencesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */; };
+		CB02E011295100E70008AB44 /* StatisticsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB02E010295100E70008AB44 /* StatisticsVC.swift */; };
+		CB02E0142951037E0008AB44 /* SelectionList in Frameworks */ = {isa = PBXBuildFile; productRef = CB02E0132951037E0008AB44 /* SelectionList */; };
+		CB496679294E91F500934805 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB496678294E91F500934805 /* GoogleService-Info.plist */; };
 		CBAB2CD3294A9218001876DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD2294A9218001876DD /* AppDelegate.swift */; };
 		CBAB2CD5294A9218001876DD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD4294A9218001876DD /* SceneDelegate.swift */; };
 		CBAB2CD7294A9218001876DD /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD6294A9218001876DD /* HomeVC.swift */; };
@@ -14,7 +18,6 @@
 		CBAB2CDF294A921A001876DD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CBAB2CDD294A921A001876DD /* LaunchScreen.storyboard */; };
 		CBAB2CEB294A949E001876DD /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CEA294A949E001876DD /* CalendarKit */; };
 		CBAB2CED294A96FC001876DD /* EKWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CEC294A96FC001876DD /* EKWrapper.swift */; };
-		CBAB2CEF294A9A5C001876DD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */; };
 		CBAB2CF3294AD92C001876DD /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF2294AD92C001876DD /* FirebaseAnalytics */; };
 		CBAB2CF5294AD92C001876DD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF4294AD92C001876DD /* FirebaseAuth */; };
 		CBAB2CF7294AD92C001876DD /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2CF6294AD92C001876DD /* FirebaseFirestore */; };
@@ -52,6 +55,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesVC.swift; sourceTree = "<group>"; };
+		CB02E010295100E70008AB44 /* StatisticsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsVC.swift; sourceTree = "<group>"; };
+		CB496678294E91F500934805 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CBAB2CCF294A9218001876DD /* Calendarize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Calendarize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBAB2CD2294A9218001876DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CBAB2CD4294A9218001876DD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -60,8 +66,6 @@
 		CBAB2CDE294A921A001876DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CBAB2CE0294A921A001876DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBAB2CEC294A96FC001876DD /* EKWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EKWrapper.swift; sourceTree = "<group>"; };
-		CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		CBAB2CF0294A9AA1001876DD /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CBAB2CFA294AE588001876DD /* UIColor+ColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+ColorScheme.swift"; sourceTree = "<group>"; };
 		CBAB2CFC294AE59E001876DD /* UIColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Hex.swift"; sourceTree = "<group>"; };
 		CBAB2CFE294AE5F2001876DD /* UIViewController+HideKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+HideKeyboard.swift"; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				CBAB2CF7294AD92C001876DD /* FirebaseFirestore in Frameworks */,
 				CBAB2D36294BCEB8001876DD /* FirebaseFirestoreSwift in Frameworks */,
 				CBAB2CF5294AD92C001876DD /* FirebaseAuth in Frameworks */,
+				CB02E0142951037E0008AB44 /* SelectionList in Frameworks */,
 				CBAB2D28294BB2E6001876DD /* NotificationBannerSwift in Frameworks */,
 				CBAB2D3F294BD284001876DD /* TagListView in Frameworks */,
 				CBAB2CEB294A949E001876DD /* CalendarKit in Frameworks */,
@@ -113,7 +118,6 @@
 		CBAB2CC6294A9218001876DD = {
 			isa = PBXGroup;
 			children = (
-				CBAB2CEE294A9A5C001876DD /* GoogleService-Info.plist */,
 				CBAB2CD1294A9218001876DD /* Calendarize */,
 				CBAB2CD0294A9218001876DD /* Products */,
 				CBAB2D34294BCEB8001876DD /* Frameworks */,
@@ -138,8 +142,8 @@
 				CBAB2CD4294A9218001876DD /* SceneDelegate.swift */,
 				CBAB2CDB294A921A001876DD /* Assets.xcassets */,
 				CBAB2CDD294A921A001876DD /* LaunchScreen.storyboard */,
+				CB496678294E91F500934805 /* GoogleService-Info.plist */,
 				CBAB2CE0294A921A001876DD /* Info.plist */,
-				CBAB2CF0294A9AA1001876DD /* GoogleService-Info.plist */,
 			);
 			path = Calendarize;
 			sourceTree = "<group>";
@@ -184,6 +188,8 @@
 				CBAB2D2D294BB5D9001876DD /* TasksVC.swift */,
 				CBAB2D32294BB700001876DD /* TaskEditorVC.swift */,
 				CBAB2D37294BCFD2001876DD /* ProfileVC.swift */,
+				CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */,
+				CB02E010295100E70008AB44 /* StatisticsVC.swift */,
 				CBAB2D39294BD1E5001876DD /* HabitsVC.swift */,
 				CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */,
 				CBAB2CF8294ADBB9001876DD /* Onboarding */,
@@ -242,6 +248,7 @@
 				CBAB2D30294BB682001876DD /* EzPopup */,
 				CBAB2D35294BCEB8001876DD /* FirebaseFirestoreSwift */,
 				CBAB2D3E294BD284001876DD /* TagListView */,
+				CB02E0132951037E0008AB44 /* SelectionList */,
 			);
 			productName = Calendarize;
 			productReference = CBAB2CCF294A9218001876DD /* Calendarize.app */;
@@ -277,6 +284,7 @@
 				CBAB2D26294BB2E6001876DD /* XCRemoteSwiftPackageReference "NotificationBanner" */,
 				CBAB2D2F294BB682001876DD /* XCRemoteSwiftPackageReference "EzPopup" */,
 				CBAB2D3D294BD283001876DD /* XCRemoteSwiftPackageReference "TagListView" */,
+				CB02E0122951037D0008AB44 /* XCRemoteSwiftPackageReference "SelectionList" */,
 			);
 			productRefGroup = CBAB2CD0294A9218001876DD /* Products */;
 			projectDirPath = "";
@@ -294,7 +302,7 @@
 			files = (
 				CBAB2CDF294A921A001876DD /* LaunchScreen.storyboard in Resources */,
 				CBAB2CDC294A921A001876DD /* Assets.xcassets in Resources */,
-				CBAB2CEF294A9A5C001876DD /* GoogleService-Info.plist in Resources */,
+				CB496679294E91F500934805 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,6 +330,7 @@
 				CBAB2D03294AE984001876DD /* MediumLabel.swift in Sources */,
 				CBAB2CD3294A9218001876DD /* AppDelegate.swift in Sources */,
 				CBAB2D1B294BA3AC001876DD /* CKWrapper.swift in Sources */,
+				CB02E011295100E70008AB44 /* StatisticsVC.swift in Sources */,
 				CBAB2D17294AEF0B001876DD /* Authentication.swift in Sources */,
 				CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */,
 				CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */,
@@ -330,6 +339,7 @@
 				CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */,
 				CBAB2D3C294BD237001876DD /* HabitEditorVC.swift in Sources */,
 				CBAB2D0D294AEE8C001876DD /* HabitInstance.swift in Sources */,
+				CB02DFEF2950EEA50008AB44 /* PreferencesVC.swift in Sources */,
 				CBAB2CFD294AE59E001876DD /* UIColor+Hex.swift in Sources */,
 				CBAB2CD5294A9218001876DD /* SceneDelegate.swift in Sources */,
 				CBAB2D14294AEECC001876DD /* Database.swift in Sources */,
@@ -547,6 +557,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CB02E0122951037D0008AB44 /* XCRemoteSwiftPackageReference "SelectionList" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yonat/SelectionList.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		CBAB2CE9294A949E001876DD /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
@@ -590,6 +608,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CB02E0132951037E0008AB44 /* SelectionList */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB02E0122951037D0008AB44 /* XCRemoteSwiftPackageReference "SelectionList" */;
+			productName = SelectionList;
+		};
 		CBAB2CEA294A949E001876DD /* CalendarKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CBAB2CE9294A949E001876DD /* XCRemoteSwiftPackageReference "CalendarKit" */;

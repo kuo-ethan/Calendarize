@@ -14,24 +14,37 @@ class User: Codable {
     
     init(email: String, fullname: String, habits: [Habit], tasks: [Task]) {
         self.email = email
-        self.fullname = fullname
+        self.fullName = fullname
         self.habits = habits
         self.tasks = tasks
+        
+        // Defaults
+        self.savedHabitTags = ["Gym", "Read", "Prayer", "Run", "Stretch", "Relax", "Family"]
+        self.ckEvents = []
+        self.awakeInterval  = DayInterval(startTime: Time(fromString: "8:00 AM"), endTime: Time(fromString: "10:00 PM"))
+        self.productivityStyle = .Dynamic
     }
     
     @DocumentID var uid: UserID?
     
     var email: String
     
-    var fullname: String
+    var fullName: String
     
     var habits: [Habit]
     
     var tasks: [Task]
     
-    var savedHabitTags: [String] = ["Gym", "Read", "Prayer", "Run", "Stretch", "Relax", "Family"]
+    var savedHabitTags: [String]
     
     // MARK: CalendarKit events for the next two full days
-    var ckEvents: [CKEvent] = []
+    var ckEvents: [CKEvent]
+    
+    var awakeInterval: DayInterval
+    
+    var productivityStyle: ProductivityStyle
 }
 
+enum ProductivityStyle: String, Codable {
+    case Dynamic, Frontload, Balanced, Backload
+}

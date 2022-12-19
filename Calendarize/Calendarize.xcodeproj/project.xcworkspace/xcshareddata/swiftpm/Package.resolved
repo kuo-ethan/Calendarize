@@ -136,6 +136,15 @@
       }
     },
     {
+      "identity" : "selectionlist",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/yonat/SelectionList.git",
+      "state" : {
+        "revision" : "6848c0884020702299798a4aef96f6de95f81719",
+        "version" : "1.4.0"
+      }
+    },
+    {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit",
