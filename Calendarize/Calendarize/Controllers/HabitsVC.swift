@@ -10,7 +10,7 @@ import UIKit
 
 class HabitsVC: UIViewController {
     
-    var commitmentGroups: [HeaderItem] = []
+    var habitGroups: [HeaderItem] = []
     
     var collectionView: UICollectionView!
     
@@ -53,14 +53,32 @@ class HabitsVC: UIViewController {
         title = "Habits"
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.left"), style: .plain, target: self, action: #selector(didTapBackButton))
         let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(didTapAddButton))
-        // backButton.tintColor = .primary
-        // addButton.tintColor = .primary
+        
         navigationItem.leftBarButtonItem = backButton
         navigationItem.rightBarButtonItem = addButton
         
         // Set layout to collection view
         var layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         layoutConfig.backgroundColor = .white
+        
+        // Define right-to-left swipe action
+        layoutConfig.trailingSwipeActionsConfigurationProvider = { [unowned self] (indexPath) in
+            
+            // Configure swipe action here
+            guard let item = dataSource.itemIdentifier(for: indexPath) else {
+                fatalError("Failed to retrieve habit instance item for swipe action")
+            }
+            
+            // Create action (deletion)
+            let deleteAction = UIContextualAction(style: .normal, title: "Delete") { (action, view, completion) in
+                
+                self.handleSwipe(for: action, item: item)
+                completion(true)
+            }
+            deleteAction.backgroundColor = .primary
+            return UISwipeActionsConfiguration(actions: [deleteAction])
+        }
+        
         let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: listLayout)
         // collectionView.tintColor = .primary
@@ -122,20 +140,25 @@ class HabitsVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Coming back from adding commitments
+        // Coming back from adding habit
         var headerItems: [HeaderItem] = []
         
         // Authentication current user should be fully updated via listener
         // However, at sign up launch, currentUser might be nil but will soon be linked.
         guard let currentUser = Authentication.shared.currentUser else { return }
         
-        for commitmentType in currentUser.habits {
-            let currentType = commitmentType.type
+        for habitType in currentUser.habits {
+            let currentType = habitType.type
             var instanceItems: [InstanceItem] = []
-            func sortPredicate(_ a: HabitInstance, _ b: HabitInstance) -> Bool {
+            
+//            func sortPredicate(_ a: HabitInstance, _ b: HabitInstance) -> Bool {
+//                return a.dayOfWeek.rawValue < b.dayOfWeek.rawValue
+//            }
+//            let instancesSortedByDay = habitType.instances.sorted(by: sortPredicate)
+            
+            let instancesSortedByDay = habitType.instances.sorted { a, b in
                 return a.dayOfWeek.rawValue < b.dayOfWeek.rawValue
             }
-            let instancesSortedByDay = commitmentType.instances.sorted(by: sortPredicate)
             
             for instance in instancesSortedByDay {
                 // For each instance, need 1) morning, afternoon, evening 2) Day of week and duration
@@ -161,7 +184,7 @@ class HabitsVC: UIViewController {
             headerItems.append(HeaderItem(title: currentType, instances: instanceItems))
         }
         
-        commitmentGroups = headerItems
+        habitGroups = headerItems
         
         reloadExpandableCollectionView()
     }
@@ -176,7 +199,7 @@ class HabitsVC: UIViewController {
         // Create a section snapshot for main section
         var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem>()
 
-        for headerItem in commitmentGroups {
+        for headerItem in habitGroups {
            
             // Create a header ListItem & append as parent
             let headerListItem = ListItem.header(headerItem)
@@ -204,3 +227,23 @@ class HabitsVC: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 }
+
+// For swipe deletion
+private extension HabitsVC {
+    
+    func handleSwipe(for action: UIContextualAction, item: ListItem) {
+        print("deleting habit instance \(item)")
+        // MARK: To-do
+        // When deleting a habit instance, need to remote it from currentUser.
+        // This means that each ListItem must contain a reference to their corresponding object
+        // HeaderItem -> Habit
+        // InstanceItem -> HabitInstance
+        // Then remove item.reference from currentUser, and reload the collection view.
+        // May abstract out the reloading code from viewWillAppear and call that method
+        
+        // MARK: then after, habit validation
+        // In didTapCheck in HabitEditorVC, just iterate through all habit instances.
+        // For all instances with overlap, check if doing habits at extremeties is valid
+    }
+}
+
