@@ -212,8 +212,15 @@ class HabitEditorVC: UIViewController {
         customTagTextField.text = ""
     }
     
+    // Returns whether the given habit is compatible with all habits in otherHabits
+    // Note: the given habit may be present in otherHabits, just ignore it
+    private func validateHabit(habit: Habit, among otherHabits: [Habit]) -> Bool {
+        // MARK: To-do
+        return true
+    }
+    
     private func saveHabit() {
-        // MARK: Need to check that these habit instances don't overlap with existing ones.
+        
         let currentTag = tagListView.tagViews[habitTagsDelegate.selectedTagIndex]
         let currentHabitType = currentTag.currentTitle!
         
@@ -231,6 +238,21 @@ class HabitEditorVC: UIViewController {
         }
         
         guard let currentUser = Authentication.shared.currentUser else { return }
+        
+        // MARK: Need to check that these habit instances don't overlap with existing ones.
+        var allHabits: [Habit] = []
+        for habitType in currentUser.habits.keys {
+            allHabits.append(contentsOf: currentUser.habits[habitType]!)
+        }
+        allHabits.append(contentsOf: instances)
+        
+        for habit in instances {
+            if !validateHabit(habit: habit, among: allHabits) {
+                print("ERROR: Habit \(habit.id) overlaps with other habits and cannot be completed.")
+                return
+            }
+        }
+        
         for habitType in currentUser.habits.keys {
             if habitType == currentHabitType {
                 currentUser.habits[habitType]!.append(contentsOf: instances)
