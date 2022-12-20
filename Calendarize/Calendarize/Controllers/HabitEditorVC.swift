@@ -150,12 +150,9 @@ class HabitEditorVC: UIViewController {
         hideKeyboardWhenTappedAround()
         
         customTagTextField.registerCompletion(completion: didTapSubmitCustomTag)
-        // customTagSubmitButton.addTarget(self, action: #selector(didTapSubmitCustomTag), for: .touchUpInside)
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.left"), style: .plain, target: self, action: #selector(didTapBackButton))
-        // backButton.tintColor = .primary
         let saveButton = UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .plain, target: self, action: #selector(didTapSaveCommitment))
-        // saveButton.tintColor = .primary
         
         navigationItem.leftBarButtonItem = backButton
         navigationItem.rightBarButtonItem = saveButton

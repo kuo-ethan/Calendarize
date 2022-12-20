@@ -27,6 +27,18 @@ class PreferencesVC: UIViewController {
         selectionList.deselectionImage = UIImage(systemName: "circle")
         selectionList.translatesAutoresizingMaskIntoConstraints = false
         
+        let currentProductivityStyle = Authentication.shared.currentUser!.productivityStyle
+        switch (currentProductivityStyle) {
+            case .Dynamic:
+                selectionList.selectedIndex = 0
+            case .Frontload:
+                selectionList.selectedIndex = 1
+            case .Balanced:
+                selectionList.selectedIndex = 2
+            case .Backload:
+                selectionList.selectedIndex = 3
+        }
+        
         return selectionList
     }()
     
@@ -42,6 +54,9 @@ class PreferencesVC: UIViewController {
         dp.minuteInterval = 30
         dp.datePickerMode = .time
         dp.translatesAutoresizingMaskIntoConstraints = false
+        
+        let initialTime = Authentication.shared.currentUser!.awakeInterval.startTime
+        dp.setDate(Utility.timeToDate(time: initialTime), animated: false)
         
         return dp
     }()
@@ -59,6 +74,9 @@ class PreferencesVC: UIViewController {
         dp.datePickerMode = .time
         dp.translatesAutoresizingMaskIntoConstraints = false
         
+        let initialTime = Authentication.shared.currentUser!.awakeInterval.endTime
+        dp.setDate(Utility.timeToDate(time: initialTime), animated: false)
+        
         return dp
     }()
     
@@ -67,6 +85,10 @@ class PreferencesVC: UIViewController {
         
         title = "Preferences"
         view.backgroundColor = .white
+        
+        productivityStyleList.addTarget(self, action: #selector(selectionChanged), for: .valueChanged)
+        wakeUpTimeSelector.addTarget(self, action: #selector(wakeUpTimeChanged), for: .valueChanged)
+        bedTimeSelector.addTarget(self, action: #selector(bedTimeChanged), for: .valueChanged)
         
         let wakeUpStack = UIStackView()
         wakeUpStack.axis = .horizontal
@@ -104,5 +126,36 @@ class PreferencesVC: UIViewController {
             bedTimeStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             bedTimeStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
+    }
+    
+    @objc private func selectionChanged() {
+        let index = productivityStyleList.selectedIndex
+        let currentUser = Authentication.shared.currentUser!
+        if index == 0 {
+            currentUser.productivityStyle = .Dynamic
+        } else if index == 1 {
+            currentUser.productivityStyle = .Frontload
+        } else if index == 2 {
+            currentUser.productivityStyle = .Balanced
+        } else if index == 3 {
+            currentUser.productivityStyle = .Backload
+        }
+        Database.shared.updateUser(currentUser, nil)
+    }
+    
+    @objc private func wakeUpTimeChanged() {
+        let currentUser = Authentication.shared.currentUser!
+        let wakeUpTime = Time(fromString: wakeUpTimeSelector.date.formatted(date: .omitted, time: .shortened))
+        let bedTime = Authentication.shared.currentUser!.awakeInterval.endTime
+        currentUser.awakeInterval = DayInterval(startTime: wakeUpTime, endTime: bedTime)
+        Database.shared.updateUser(currentUser, nil)
+    }
+    
+    @objc private func bedTimeChanged() {
+        let currentUser = Authentication.shared.currentUser!
+        let wakeUpTime = Authentication.shared.currentUser!.awakeInterval.startTime
+        let bedTime = Time(fromString: bedTimeSelector.date.formatted(date: .omitted, time: .shortened))
+        currentUser.awakeInterval = DayInterval(startTime: wakeUpTime, endTime: bedTime)
+        Database.shared.updateUser(currentUser, nil)
     }
 }

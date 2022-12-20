@@ -36,4 +36,14 @@ class Utility {
         return dateFormatter.string(from: date)
     }
     
+    static func timeToDate(time: Time) -> Date {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat =  "HH:mm"
+        
+        let dateString = "\(time.hour):\(time.minutes)"
+
+        let date = dateFormatter.date(from: dateString)
+
+        return date!
+    }
 }
