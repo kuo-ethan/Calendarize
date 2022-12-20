@@ -30,8 +30,7 @@
 		CBAB2D07294AEAA6001876DD /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D06294AEAA6001876DD /* Utility.swift */; };
 		CBAB2D09294AEB51001876DD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D08294AEB51001876DD /* User.swift */; };
 		CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0A294AEBE8001876DD /* Task.swift */; };
-		CBAB2D0D294AEE8C001876DD /* HabitInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */; };
-		CBAB2D0F294AEEA9001876DD /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0E294AEEA9001876DD /* Habit.swift */; };
+		CBAB2D0D294AEE8C001876DD /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D0C294AEE8C001876DD /* Habit.swift */; };
 		CBAB2D14294AEECC001876DD /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D13294AEECC001876DD /* Database.swift */; };
 		CBAB2D17294AEF0B001876DD /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D16294AEF0B001876DD /* Authentication.swift */; };
 		CBAB2D19294AEF46001876DD /* DayInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D18294AEF46001876DD /* DayInterval.swift */; };
@@ -75,8 +74,7 @@
 		CBAB2D06294AEAA6001876DD /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 		CBAB2D08294AEB51001876DD /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		CBAB2D0A294AEBE8001876DD /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
-		CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitInstance.swift; sourceTree = "<group>"; };
-		CBAB2D0E294AEEA9001876DD /* Habit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Habit.swift; sourceTree = "<group>"; };
+		CBAB2D0C294AEE8C001876DD /* Habit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Habit.swift; sourceTree = "<group>"; };
 		CBAB2D13294AEECC001876DD /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		CBAB2D16294AEF0B001876DD /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
 		CBAB2D18294AEF46001876DD /* DayInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayInterval.swift; sourceTree = "<group>"; };
@@ -155,8 +153,7 @@
 				CBAB2D1A294BA3AC001876DD /* CKWrapper.swift */,
 				CBAB2D06294AEAA6001876DD /* Utility.swift */,
 				CBAB2D08294AEB51001876DD /* User.swift */,
-				CBAB2D0E294AEEA9001876DD /* Habit.swift */,
-				CBAB2D0C294AEE8C001876DD /* HabitInstance.swift */,
+				CBAB2D0C294AEE8C001876DD /* Habit.swift */,
 				CBAB2D0A294AEBE8001876DD /* Task.swift */,
 				CBAB2D18294AEF46001876DD /* DayInterval.swift */,
 				CBAB2D13294AEECC001876DD /* Database.swift */,
@@ -318,7 +315,6 @@
 				CBAB2D19294AEF46001876DD /* DayInterval.swift in Sources */,
 				CBAB2D2A294BB451001876DD /* LoadingButton.swift in Sources */,
 				CBAB2D38294BCFD2001876DD /* ProfileVC.swift in Sources */,
-				CBAB2D0F294AEEA9001876DD /* Habit.swift in Sources */,
 				CBAB2CFB294AE588001876DD /* UIColor+ColorScheme.swift in Sources */,
 				CBAB2D23294BB19A001876DD /* HorizontalActionLabel.swift in Sources */,
 				CBAB2CD7294A9218001876DD /* HomeVC.swift in Sources */,
@@ -338,7 +334,7 @@
 				CBAB2D09294AEB51001876DD /* User.swift in Sources */,
 				CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */,
 				CBAB2D3C294BD237001876DD /* HabitEditorVC.swift in Sources */,
-				CBAB2D0D294AEE8C001876DD /* HabitInstance.swift in Sources */,
+				CBAB2D0D294AEE8C001876DD /* Habit.swift in Sources */,
 				CB02DFEF2950EEA50008AB44 /* PreferencesVC.swift in Sources */,
 				CBAB2CFD294AE59E001876DD /* UIColor+Hex.swift in Sources */,
 				CBAB2CD5294A9218001876DD /* SceneDelegate.swift in Sources */,

@@ -12,13 +12,13 @@ typealias UserID = String
 
 class User: Codable {
     
-    init(email: String, fullname: String, habits: [Habit], tasks: [Task]) {
+    init(email: String, fullname: String) {
         self.email = email
         self.fullName = fullname
-        self.habits = habits
-        self.tasks = tasks
         
         // Defaults
+        self.habits = [:]
+        self.tasks = []
         self.savedHabitTags = ["Gym", "Read", "Prayer", "Run", "Stretch", "Relax", "Family"]
         self.ckEvents = []
         self.awakeInterval  = DayInterval(startTime: Time(fromString: "8:00 AM"), endTime: Time(fromString: "10:00 PM"))
@@ -31,7 +31,8 @@ class User: Codable {
     
     var fullName: String
     
-    var habits: [Habit]
+    // var habits: [Habit]
+    var habits: Dictionary<String, [Habit]>
     
     var tasks: [Task]
     

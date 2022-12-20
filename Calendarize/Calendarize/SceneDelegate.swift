@@ -6,6 +6,7 @@
 //
 
 import UIKit
+// import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -18,6 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
+        
+        // MARK: if you forgot to sign out before some changes
+//        do {
+//            Authentication.shared.unlinkCurrentUser()
+//            try FirebaseAuth.Auth.auth().signOut()
+//        } catch { return }
         
         // window?.makeKeyAndVisible()
         window?.tintColor = .primary

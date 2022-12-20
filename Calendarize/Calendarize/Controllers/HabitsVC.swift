@@ -32,16 +32,20 @@ class HabitsVC: UIViewController {
     }
     
     // Symbol cell data type
-    struct InstanceItem: Hashable, Identifiable {
+    struct InstanceItem: Hashable {
         
-        let id = UUID() // Just to enable same instance descriptions
+        // let id = UUID() // Just to enable same instance descriptions
         
         let text: String
         let image: UIImage
+        let associatedHabitType: String
+        let associatedHabitID: UUID
         
-        init(text: String, sfSymbolName: String) {
+        init(withDescription text: String, withImage sfSymbol: UIImage, forHabitType habitType: String, associatedHabitID: UUID) {
             self.text = text
-            self.image = UIImage(systemName: sfSymbolName)!
+            self.image = sfSymbol
+            self.associatedHabitType = habitType
+            self.associatedHabitID = associatedHabitID
         }
     }
     
@@ -81,7 +85,7 @@ class HabitsVC: UIViewController {
         
         let listLayout = UICollectionViewCompositionalLayout.list(using: layoutConfig)
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: listLayout)
-        // collectionView.tintColor = .primary
+        collectionView.delegate = self
         view.addSubview(collectionView)
         
         // Make collection view take up the entire view
@@ -138,30 +142,39 @@ class HabitsVC: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        super.viewWillAppear(animated)
         
         // Coming back from adding habit
+        refreshCollectionView()
+        
+    }
+    
+    private func refreshCollectionView() {
+        
         var headerItems: [HeaderItem] = []
         
         // Authentication current user should be fully updated via listener
         // However, at sign up launch, currentUser might be nil but will soon be linked.
         guard let currentUser = Authentication.shared.currentUser else { return }
         
-        for habitType in currentUser.habits {
-            let currentType = habitType.type
+        // DEBUGGING
+        for habitType in currentUser.habits.keys {
+            print("\(habitType) ============")
+            for instance in currentUser.habits[habitType]! {
+                print(instance.id)
+            }
+        }
+        
+        
+        for habitType in currentUser.habits.keys {
+            let currentType = habitType
             var instanceItems: [InstanceItem] = []
             
-//            func sortPredicate(_ a: HabitInstance, _ b: HabitInstance) -> Bool {
-//                return a.dayOfWeek.rawValue < b.dayOfWeek.rawValue
-//            }
-//            let instancesSortedByDay = habitType.instances.sorted(by: sortPredicate)
-            
-            let instancesSortedByDay = habitType.instances.sorted { a, b in
+            let instancesSortedByDay = currentUser.habits[habitType]!.sorted { a, b in
                 return a.dayOfWeek.rawValue < b.dayOfWeek.rawValue
             }
             
             for instance in instancesSortedByDay {
-                // For each instance, need 1) morning, afternoon, evening 2) Day of week and duration
                 // MARK: Decided to omit duration for simplicity
                 let dayOfWeek = INDEX_TO_DAY[instance.dayOfWeek.rawValue]
                 let duration = Utility.durationInSecondsToStringifiedHoursAndMinutes(instance.duration)
@@ -178,7 +191,7 @@ class HabitsVC: UIViewController {
                     sfSymbolName = "moon"
                 }
                 
-                instanceItems.append(InstanceItem(text: dayOfWeek + " " + duration, sfSymbolName: sfSymbolName))
+                instanceItems.append(InstanceItem(withDescription: dayOfWeek + " " + duration, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
             }
             
             headerItems.append(HeaderItem(title: currentType, instances: instanceItems))
@@ -228,11 +241,16 @@ class HabitsVC: UIViewController {
     }
 }
 
+extension HabitsVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        return false
+    }
+}
+
 // For swipe deletion
 private extension HabitsVC {
     
     func handleSwipe(for action: UIContextualAction, item: ListItem) {
-        print("deleting habit instance \(item)")
         // MARK: To-do
         // When deleting a habit instance, need to remote it from currentUser.
         // This means that each ListItem must contain a reference to their corresponding object
@@ -240,6 +258,34 @@ private extension HabitsVC {
         // InstanceItem -> HabitInstance
         // Then remove item.reference from currentUser, and reload the collection view.
         // May abstract out the reloading code from viewWillAppear and call that method
+        let currentUser = Authentication.shared.currentUser!
+        print("CURRENT ITEM: ", item)
+        switch item {
+        case .header(let headerItem):
+            // Remove an entire habit group
+            for habitType in currentUser.habits.keys {
+                if headerItem.title == habitType {
+                    // Remove all habits under habit type
+                    print("Removing a habit group")
+                    currentUser.habits.removeValue(forKey: habitType)
+                    Database.shared.updateUser(currentUser, nil)
+                }
+            }
+        case .instance(let instanceItem):
+            // Remove a single habit instance
+            let habitType = instanceItem.associatedHabitType
+            let indexOfHabitToDelete = currentUser.habits[habitType]!.firstIndex { habit in
+                instanceItem.associatedHabitID == habit.id
+            }
+            guard let indexOfHabitToDelete = indexOfHabitToDelete else {
+                fatalError("Instance item does not correspond to an existing habit")
+            }
+            print("Removing a habit instance")
+            currentUser.habits[habitType]!.remove(at: indexOfHabitToDelete)
+            Database.shared.updateUser(currentUser, nil)
+        }
+        
+        refreshCollectionView()
         
         // MARK: then after, habit validation
         // In didTapCheck in HabitEditorVC, just iterate through all habit instances.

@@ -171,7 +171,7 @@ class SignUpVC: UIViewController {
             
             // Add new user to firestore (no habits yet)
             guard let authResult = result else { return }
-            let newUser = User(email: email, fullname: fullName, habits: [], tasks: [])
+            let newUser = User(email: email, fullname: fullName)
             Authentication.shared.linkNewUser(withuid: authResult.user.uid, withData: newUser) {
                 
                 guard let window = self.view.window else { return }
@@ -183,29 +183,7 @@ class SignUpVC: UIViewController {
                 let duration: TimeInterval = 0.3
                 UIView.transition(with: window, duration: duration, options: options, animations: {}, completion: nil)
             }
-            
-            
-            
-//            guard let window = self.view.window else { return }
-//            let vc = CommitmentsVC()
-//            let navigationController = UINavigationController(rootViewController: vc)
-//
-//            let appearance = UINavigationBarAppearance()
-//            appearance.configureWithOpaqueBackground()
-//            appearance.shadowColor = nil
-//
-//            let navigationBar = navigationController.navigationBar
-//            navigationBar.standardAppearance = appearance
-//            navigationBar.scrollEdgeAppearance = appearance
-//
-//
-//            window.rootViewController = navigationController
-//            let options: UIView.AnimationOptions = .transitionCrossDissolve
-//            let duration: TimeInterval = 0.3
-//            UIView.transition(with: window, duration: duration, options: options, animations: {}, completion: nil)
         }
-        
-        
     }
     
     // Copied from SignInVC

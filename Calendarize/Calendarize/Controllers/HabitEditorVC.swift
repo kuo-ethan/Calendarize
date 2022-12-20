@@ -153,7 +153,7 @@ class HabitEditorVC: UIViewController {
         customTagTextField.registerCompletion(completion: didTapSubmitCustomTag)
         
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.left"), style: .plain, target: self, action: #selector(didTapBackButton))
-        let saveButton = UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .plain, target: self, action: #selector(didTapSaveCommitment))
+        let saveButton = UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .plain, target: self, action: #selector(didTapSaveHabit))
         
         navigationItem.leftBarButtonItem = backButton
         navigationItem.rightBarButtonItem = saveButton
@@ -189,7 +189,7 @@ class HabitEditorVC: UIViewController {
         ])
     }
     
-    @objc private func didTapSaveCommitment() {
+    @objc private func didTapSaveHabit() {
         saveHabit()
     }
     
@@ -217,7 +217,7 @@ class HabitEditorVC: UIViewController {
         let currentTag = tagListView.tagViews[habitTagsDelegate.selectedTagIndex]
         let currentHabitType = currentTag.currentTitle!
         
-        var instances: [HabitInstance] = []
+        var instances: [Habit] = []
         
         let duration = durationScrollablePicker.countDownDuration
         let startTime = fromTimeScrollablePicker.date.formatted(date: .omitted, time: .shortened)
@@ -227,13 +227,13 @@ class HabitEditorVC: UIViewController {
         for index in dayTagsDelegate.selectedDayIndices {
             // create a commitment instance for that day
             let dayOfWeek = DayOfWeek(rawValue: index)!
-            instances.append(HabitInstance(duration: duration, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
+            instances.append(Habit(id: UUID(), duration: duration, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
         }
         
         guard let currentUser = Authentication.shared.currentUser else { return }
-        for habit in currentUser.habits {
-            if habit.type == currentHabitType {
-                habit.instances.append(contentsOf: instances)
+        for habitType in currentUser.habits.keys {
+            if habitType == currentHabitType {
+                currentUser.habits[habitType]!.append(contentsOf: instances)
                 Database.shared.updateUser(currentUser) { error in
                     if let _ = error {
                         fatalError("Failed to write to existing habit in Firestore")
@@ -245,7 +245,7 @@ class HabitEditorVC: UIViewController {
             }
         }
         // Adding a new type of commitment
-        currentUser.habits.append(Habit(type: currentHabitType, instances: instances))
+        currentUser.habits[currentHabitType] = instances
         Database.shared.updateUser(currentUser) { error in
             if let _ = error {
                 fatalError("Failed to write new habit into Firestore")
