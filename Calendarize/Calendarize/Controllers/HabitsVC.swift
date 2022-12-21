@@ -189,7 +189,6 @@ class HabitsVC: UIViewController {
                     sfSymbolName = "moon"
                 }
                 let timeInterval = "\(instance.dayInterval.startTime.toString()) - \(instance.dayInterval.endTime.toString())"
-                let description = "\(dayOfWeek) | \(timeInterval) | \(duration)"
                 instanceItems.append(InstanceItem(dayOfWeek: dayOfWeek, timeWindowDescription: timeInterval, duration: duration, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
             }
             

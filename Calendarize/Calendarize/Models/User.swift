@@ -47,6 +47,9 @@ class User: Codable {
     var awakeInterval: DayInterval
     
     var productivityStyle: ProductivityStyle
+    
+    // MARK: Defaults to nil, update when calendar generated
+    var busynessIndex: Int?
 }
 
 enum ProductivityStyle: String, Codable {

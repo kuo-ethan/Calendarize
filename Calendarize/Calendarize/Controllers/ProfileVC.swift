@@ -19,6 +19,23 @@ class ProfileVC: UIViewController {
     
     private let emailValueLabel = ContentLabel(withText: "", ofSize: DEFAULT_FONT_SIZE-1)
     
+    private let busynessIndexLabel: ContentLabel = {
+        let label = ContentLabel(withText: "N/A", ofSize: 60)
+        
+        guard let val = Authentication.shared.currentUser!.busynessIndex else {
+            return label
+        }
+        
+        let busynessIndex = String(val)
+        label.text = busynessIndex
+        
+        return label
+    }()
+    
+    private var busynessIndexView: CircularProgressBarView!
+    
+    private let CIRCULAR_ANIMATION_DURATION: TimeInterval = 1
+    
     private let tableView: UITableView = {
         let tv = UITableView()
         tv.translatesAutoresizingMaskIntoConstraints = false
@@ -41,16 +58,27 @@ class ProfileVC: UIViewController {
         view.backgroundColor = .background
         title = "Profile"
         let backButton = UIBarButtonItem(image: UIImage(systemName: "arrow.left"), style: .plain, target: self, action: #selector(didTapBackButton))
-        // backButton.tintColor = .primary
         let signOutButton = UIBarButtonItem(image: UIImage(systemName: "rectangle.portrait.and.arrow.right"), style: .plain, target: self, action: #selector(didTapSignOut))
-        // signOutButton.tintColor = .primary
         navigationItem.leftBarButtonItem = backButton
         navigationItem.rightBarButtonItem = signOutButton
+        
+        // CALayer does not use constraints
+        busynessIndexView = CircularProgressBarView(frame: .zero)
+        busynessIndexView.center = view.center
+        
+        var toValue = 0.0
+        if let val = Authentication.shared.currentUser!.busynessIndex {
+            toValue = Double(val) / 100
+        }
+        
+        busynessIndexView.progressAnimation(duration: CIRCULAR_ANIMATION_DURATION, toValue: toValue)
+        view.addSubview(busynessIndexView)
         
         view.addSubview(nameLabel)
         view.addSubview(nameValueLabel)
         view.addSubview(emailLabel)
         view.addSubview(emailValueLabel)
+        view.addSubview(busynessIndexLabel)
         view.addSubview(tableView)
         
         if let fullname = Authentication.shared.currentUser?.fullName {
@@ -74,6 +102,9 @@ class ProfileVC: UIViewController {
             emailLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
             emailValueLabel.centerYAnchor.constraint(equalTo: emailLabel.centerYAnchor),
             emailValueLabel.leadingAnchor.constraint(equalTo: emailLabel.trailingAnchor, constant: 5),
+            
+            busynessIndexLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            busynessIndexLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

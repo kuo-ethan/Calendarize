@@ -11,6 +11,7 @@
 		CB02E011295100E70008AB44 /* StatisticsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB02E010295100E70008AB44 /* StatisticsVC.swift */; };
 		CB02E0142951037E0008AB44 /* SelectionList in Frameworks */ = {isa = PBXBuildFile; productRef = CB02E0132951037E0008AB44 /* SelectionList */; };
 		CB496679294E91F500934805 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB496678294E91F500934805 /* GoogleService-Info.plist */; };
+		CB66D5D22952D85700617B47 /* CircularProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB66D5D12952D85700617B47 /* CircularProgressBarView.swift */; };
 		CBAB2CD3294A9218001876DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD2294A9218001876DD /* AppDelegate.swift */; };
 		CBAB2CD5294A9218001876DD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD4294A9218001876DD /* SceneDelegate.swift */; };
 		CBAB2CD7294A9218001876DD /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD6294A9218001876DD /* HomeVC.swift */; };
@@ -57,6 +58,7 @@
 		CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesVC.swift; sourceTree = "<group>"; };
 		CB02E010295100E70008AB44 /* StatisticsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsVC.swift; sourceTree = "<group>"; };
 		CB496678294E91F500934805 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CB66D5D12952D85700617B47 /* CircularProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBarView.swift; sourceTree = "<group>"; };
 		CBAB2CCF294A9218001876DD /* Calendarize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Calendarize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBAB2CD2294A9218001876DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CBAB2CD4294A9218001876DD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				CBAB2D29294BB451001876DD /* LoadingButton.swift */,
 				CBAB2D24294BB24F001876DD /* TitleLabel.swift */,
 				CBAB2CF9294AE558001876DD /* Extensions */,
+				CB66D5D12952D85700617B47 /* CircularProgressBarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				CB02E011295100E70008AB44 /* StatisticsVC.swift in Sources */,
 				CBAB2D17294AEF0B001876DD /* Authentication.swift in Sources */,
 				CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */,
+				CB66D5D22952D85700617B47 /* CircularProgressBarView.swift in Sources */,
 				CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */,
 				CBAB2D2E294BB5D9001876DD /* TasksVC.swift in Sources */,
 				CBAB2D09294AEB51001876DD /* User.swift in Sources */,

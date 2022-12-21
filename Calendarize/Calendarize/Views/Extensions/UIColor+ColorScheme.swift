@@ -22,6 +22,8 @@ extension UIColor {
     
     public static let habitEventColor = UIColor(hex: "#ff5552")!
     
+    public static let busynessIndexBackgroundColor = UIColor(hex: "#f0f0f0")!
+    
     public static let background = UIColor.white
 }
 
