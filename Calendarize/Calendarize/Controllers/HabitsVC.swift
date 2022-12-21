@@ -156,16 +156,7 @@ class HabitsVC: UIViewController {
         // Authentication current user should be fully updated via listener
         // However, at sign up launch, currentUser might be nil but will soon be linked.
         guard let currentUser = Authentication.shared.currentUser else { return }
-        
-        // DEBUGGING
-        for habitType in currentUser.habits.keys {
-            print("\(habitType) ============")
-            for instance in currentUser.habits[habitType]! {
-                print(instance.id)
-            }
-        }
-        
-        
+
         for habitType in currentUser.habits.keys {
             let currentType = habitType
             var instanceItems: [InstanceItem] = []
@@ -177,7 +168,7 @@ class HabitsVC: UIViewController {
             for instance in instancesSortedByDay {
                 // MARK: Decided to omit duration for simplicity
                 let dayOfWeek = INDEX_TO_DAY[instance.dayOfWeek.rawValue]
-                let duration = Utility.durationInSecondsToStringifiedHoursAndMinutes(instance.duration)
+                let duration = Utility.minutesToStringifiedHoursAndMinutes(instance.minutes)
                 let startHour = instance.dayInterval.startTime.hour
                 var sfSymbolName: String!
                 if startHour < 12 {
@@ -190,8 +181,9 @@ class HabitsVC: UIViewController {
                     // Evening is from 5:00 PM to 11:59 PM
                     sfSymbolName = "moon"
                 }
-                
-                instanceItems.append(InstanceItem(withDescription: dayOfWeek + " " + duration, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
+                let timeInterval = "\(instance.dayInterval.startTime.toString()) - \(instance.dayInterval.endTime.toString())"
+                let description = "\(dayOfWeek) | \(timeInterval) | \(duration)"
+                instanceItems.append(InstanceItem(withDescription: description, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
             }
             
             headerItems.append(HeaderItem(title: currentType, instances: instanceItems))
@@ -286,10 +278,6 @@ private extension HabitsVC {
         }
         
         refreshCollectionView()
-        
-        // MARK: then after, habit validation
-        // In didTapCheck in HabitEditorVC, just iterate through all habit instances.
-        // For all instances with overlap, check if doing habits at extremeties is valid
     }
 }
 

@@ -22,6 +22,17 @@ class Utility {
         return "\(hours)h \(minutes)m"
     }
     
+    static func minutesToStringifiedHoursAndMinutes(_ minutes: Minutes) -> String {
+        let hrs = minutes / 60
+        let mins = minutes % 60
+        if hrs == 0 {
+            return "\(mins)m"
+        } else if mins == 0 {
+            return "\(hrs)h"
+        }
+        return "\(hrs)h \(mins)m"
+    }
+    
     static func timeTicksToStringInHours(_ timeTicks: Int) -> String {
         return String(Double(timeTicks) / 2.0)
     }

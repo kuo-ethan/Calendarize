@@ -212,11 +212,21 @@ class HabitEditorVC: UIViewController {
         customTagTextField.text = ""
     }
     
-    // Returns whether the given habit is compatible with all habits in otherHabits
-    // Note: the given habit may be present in otherHabits, just ignore it
-    private func validateHabit(habit: Habit, among otherHabits: [Habit]) -> Bool {
-        // MARK: To-do
-        return true
+    // Returns whether this habit in isolation is completable.
+    private func validateHabit(habit: Habit) -> Bool {
+        let start = habit.dayInterval.startTime
+        let end = habit.dayInterval.endTime
+        let interval = (end.hour * 60 + end.minutes) - (start.hour * 60 + start.minutes)
+        
+        if interval <= 0 {
+            print("ERROR: End time must be after start time.")
+            return false
+        } else if interval < habit.minutes {
+            print("ERROR: Habit cannot be completed in the time period.")
+            return false
+        } else {
+            return true
+        }
     }
     
     private func saveHabit() {
@@ -226,7 +236,7 @@ class HabitEditorVC: UIViewController {
         
         var instances: [Habit] = []
         
-        let duration = durationScrollablePicker.countDownDuration
+        let minutes = Int(durationScrollablePicker.countDownDuration / 60)
         let startTime = fromTimeScrollablePicker.date.formatted(date: .omitted, time: .shortened)
         let endTime = toTimeScrollablePicker.date.formatted(date: .omitted, time: .shortened)
         let timeFrame = DayInterval(startTime: Time(fromString: startTime), endTime: Time(fromString: endTime))
@@ -234,21 +244,14 @@ class HabitEditorVC: UIViewController {
         for index in dayTagsDelegate.selectedDayIndices {
             // create a commitment instance for that day
             let dayOfWeek = DayOfWeek(rawValue: index)!
-            instances.append(Habit(id: UUID(), duration: duration, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
+            instances.append(Habit(id: UUID(), minutes: minutes, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
         }
         
         guard let currentUser = Authentication.shared.currentUser else { return }
         
-        // MARK: Need to check that these habit instances don't overlap with existing ones.
-        var allHabits: [Habit] = []
-        for habitType in currentUser.habits.keys {
-            allHabits.append(contentsOf: currentUser.habits[habitType]!)
-        }
-        allHabits.append(contentsOf: instances)
-        
+        // MARK: Need to check that these habit instances are valid.
         for habit in instances {
-            if !validateHabit(habit: habit, among: allHabits) {
-                print("ERROR: Habit \(habit.id) overlaps with other habits and cannot be completed.")
+            if !validateHabit(habit: habit) {
                 return
             }
         }
