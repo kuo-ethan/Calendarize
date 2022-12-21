@@ -13,10 +13,6 @@ class TasksVC: UITableViewController {
     // The shared TasksVC for the current user
     static var shared: TasksVC!
     
-    // tasksForTableView[0] contains all priority tasks
-    // tasksForTableView[1] contains all non-priority tasks
-    // var tasksForTableView: [[Task]] = []
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,17 +23,34 @@ class TasksVC: UITableViewController {
         tableView.register(TaskCell.self, forCellReuseIdentifier: TaskCell.reuseIdentifier)
     }
     
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        return 2
-//    }
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Authentication.shared.currentUser!.tasks.count
+        if section == 0 {
+            return Authentication.shared.currentUser!.priorityTasks.count
+        } else {
+            return Authentication.shared.currentUser!.regularTasks.count
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection
+                                section: Int) -> String? {
+        if section == 0 {
+            return "Priority"
+        } else {
+            return "To-do"
+        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: TaskCell.reuseIdentifier, for: indexPath) as! TaskCell
-        cell.task = Authentication.shared.currentUser!.tasks[indexPath.item]
+        if indexPath.section == 0 {
+            cell.task = Authentication.shared.currentUser!.priorityTasks[indexPath.item]
+        } else {
+            cell.task = Authentication.shared.currentUser!.regularTasks[indexPath.item]
+        }
         print("called cell for row at")
         return cell
     }
@@ -45,7 +58,12 @@ class TasksVC: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         // Open up TaskEditorVC with the current task's info prefilled
-        let selectedTask = Authentication.shared.currentUser!.tasks[indexPath.item]
+        var selectedTask: Task!
+        if indexPath.section == 0 {
+            selectedTask = Authentication.shared.currentUser!.priorityTasks[indexPath.item]
+        } else {
+            selectedTask = Authentication.shared.currentUser!.regularTasks[indexPath.item]
+        }
         let vc = TaskEditorVC(withInitialTask: selectedTask, tableView: tableView, isNewTask: false)
         vc.modalTransitionStyle = .crossDissolve
         navigationController?.pushViewController(vc, animated: true)
@@ -53,7 +71,12 @@ class TasksVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let doneAction = UIContextualAction(style: .normal, title:  "Done", handler: { (ac: UIContextualAction, view: UIView, success: (Bool) -> Void) in
-            Authentication.shared.currentUser!.tasks.remove(at: indexPath.item)
+            
+            if indexPath.section == 0 {
+                Authentication.shared.currentUser!.priorityTasks.remove(at: indexPath.item)
+            } else {
+                Authentication.shared.currentUser!.regularTasks.remove(at: indexPath.item)
+            }
             tableView.reloadData()
             success(true)
         })
@@ -67,13 +90,6 @@ class TasksVC: UITableViewController {
         vc.modalTransitionStyle = .crossDissolve
         navigationController?.pushViewController(vc, animated: true)
     }
-    
-    @objc func didTapRefresh() {
-        // regenerate a calendar
-        // MARK: completion here should be reloadCalendar()
-//        Database.shared.updateUser(Authentication.shared.currentUser, nil)
-//        navigationController?.popViewController(animated: true)
-    }
 }
 
 class TaskCell: UITableViewCell {
@@ -81,12 +97,12 @@ class TaskCell: UITableViewCell {
     
     let timeStepper = AutoDeleteTimeStepperView()
     
-    let taskLabel = ContentLabel(withText: "", ofSize: 18)
+    let taskLabel = ContentLabel(withText: "", ofSize: 16)
     
     let deadlineLabel: UILabel = {
         let lbl = UILabel()
         lbl.textColor = .secondaryText
-        lbl.font = .systemFont(ofSize: 12, weight: .medium)
+        lbl.font = .systemFont(ofSize: 11, weight: .medium)
         
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
@@ -110,7 +126,7 @@ class TaskCell: UITableViewCell {
         contentView.addSubview(deadlineLabel)
         contentView.addSubview(timeStepper)
         NSLayoutConstraint.activate([
-            contentView.heightAnchor.constraint(equalToConstant: 70),
+            contentView.heightAnchor.constraint(equalToConstant: 65),
             
             taskLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 13),
@@ -124,27 +140,18 @@ class TaskCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    func didChangeTabs() {
-        // Load the current todo-list state into firebase
-        // Delete current schedule
-        // Run algorithm
-        // Add new schedule
-    }
 }
 
 class AutoDeleteTimeStepperView: TimeStepperView {
-    // Now, tapping decrement can actually delete a task from currentUser.
     
     override func didTapDecrement() {
         super.didTapDecrement()
         
         if associatedTask.timeTicks == 0 {
-            // Then remove the current task
-            let index = Authentication.shared.currentUser!.tasks.firstIndex { task in
+            let index = Authentication.shared.currentUser!.regularTasks.firstIndex { task in
                 return task.id == associatedTask.id
             }
-            Authentication.shared.currentUser!.tasks.remove(at: index!)
+            Authentication.shared.currentUser!.regularTasks.remove(at: index!)
         }
         TasksVC.shared.tableView.reloadData()
     }

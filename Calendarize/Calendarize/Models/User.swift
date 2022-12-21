@@ -18,7 +18,8 @@ class User: Codable {
         
         // Defaults
         self.habits = [:]
-        self.tasks = []
+        self.priorityTasks = []
+        self.regularTasks = []
         self.savedHabitTags = ["Gym", "Read", "Prayer", "Run", "Stretch", "Relax", "Family"]
         self.ckEvents = []
         self.awakeInterval  = DayInterval(startTime: Time(fromString: "8:00 AM"), endTime: Time(fromString: "10:00 PM"))
@@ -34,7 +35,9 @@ class User: Codable {
     // var habits: [Habit]
     var habits: Dictionary<String, [Habit]>
     
-    var tasks: [Task]
+    var priorityTasks: [Task]
+    
+    var regularTasks: [Task]
     
     var savedHabitTags: [String]
     

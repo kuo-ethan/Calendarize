@@ -18,21 +18,21 @@ class TaskEditorVC: UIViewController {
     
     let tableView: UITableView!
     
-    private let stack: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.distribution = .equalSpacing
-        stack.spacing = 50
-        
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
     let titleTextField: LabeledTextField = {
-        let tf = LabeledTextField(title: "Title:")
+        let tf = LabeledTextField(title: "Title")
         
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
+    }()
+    
+    let priorityLabel = TitleLabel(withText: "Priority", ofSize: DEFAULT_FONT_SIZE-2)
+    
+    let prioritySwitch: UISwitch = {
+        let prioritySwitch = UISwitch()
+        prioritySwitch.onTintColor = .primary
+        
+        prioritySwitch.translatesAutoresizingMaskIntoConstraints = false
+        return prioritySwitch
     }()
     
     let durationPickerTitle = TitleLabel(withText: "Hours", ofSize: DEFAULT_FONT_SIZE-2)
@@ -60,6 +60,7 @@ class TaskEditorVC: UIViewController {
         super.init(nibName: nil, bundle: nil)
         
         titleTextField.textField.text = task.name
+        prioritySwitch.isOn = task.isPriority
         deadlinePicker.setDate(task.deadline, animated: true)
     }
     
@@ -68,7 +69,7 @@ class TaskEditorVC: UIViewController {
         
         title = "Edit Task"
         
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .background
         
         let durationView = UIView()
         durationView.translatesAutoresizingMaskIntoConstraints = false
@@ -77,11 +78,21 @@ class TaskEditorVC: UIViewController {
         NSLayoutConstraint.activate([
             durationPickerTitle.leadingAnchor.constraint(equalTo: durationView.leadingAnchor),
             durationPickerTitle.topAnchor.constraint(equalTo: durationView.topAnchor),
-            durationPickerTitle.trailingAnchor.constraint(equalTo: durationView.trailingAnchor),
-            durationPicker.leadingAnchor.constraint(equalTo: durationView.leadingAnchor),
+            durationPickerTitle.bottomAnchor.constraint(equalTo: durationView.bottomAnchor),
             durationPicker.trailingAnchor.constraint(equalTo: durationView.trailingAnchor),
-            durationPicker.bottomAnchor.constraint(equalTo: durationView.bottomAnchor),
-            durationPickerTitle.bottomAnchor.constraint(equalTo: durationPicker.topAnchor, constant: -5)
+            durationPicker.centerYAnchor.constraint(equalTo: durationView.centerYAnchor)
+        ])
+        
+        let priorityView = UIView()
+        priorityView.translatesAutoresizingMaskIntoConstraints = false
+        priorityView.addSubview(priorityLabel)
+        priorityView.addSubview(prioritySwitch)
+        NSLayoutConstraint.activate([
+            priorityLabel.leadingAnchor.constraint(equalTo: priorityView.leadingAnchor),
+            priorityLabel.topAnchor.constraint(equalTo: priorityView.topAnchor),
+            priorityLabel.bottomAnchor.constraint(equalTo: priorityView.bottomAnchor),
+            prioritySwitch.trailingAnchor.constraint(equalTo: priorityView.trailingAnchor),
+            prioritySwitch.centerYAnchor.constraint(equalTo: priorityView.centerYAnchor)
         ])
         
         let deadlineView = UIView()
@@ -94,35 +105,35 @@ class TaskEditorVC: UIViewController {
             deadlinePickerTitle.trailingAnchor.constraint(equalTo: deadlineView.trailingAnchor),
             deadlinePicker.centerXAnchor.constraint(equalTo: deadlineView.centerXAnchor),
             deadlinePicker.bottomAnchor.constraint(equalTo: deadlineView.bottomAnchor),
-            deadlinePickerTitle.bottomAnchor.constraint(equalTo: deadlinePicker.topAnchor, constant: -5)
+            deadlinePickerTitle.bottomAnchor.constraint(equalTo: deadlinePicker.topAnchor)
         ])
         
-        stack.addArrangedSubview(titleTextField)
-        stack.addArrangedSubview(durationView)
-        stack.addArrangedSubview(deadlineView)
-        
-        view.addSubview(stack)
+        view.addSubview(titleTextField)
+        view.addSubview(priorityView)
+        view.addSubview(durationView)
+        view.addSubview(deadlineView)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor,
-                                           constant: contentEdgeInset.left),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor,
-                                            constant: -contentEdgeInset.right),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20)
+            titleTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            titleTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+            titleTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right),
+            titleTextField.heightAnchor.constraint(equalToConstant: 70),
+            
+            priorityView.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 20),
+            priorityView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+            priorityView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right),
+            priorityView.heightAnchor.constraint(equalToConstant: 50),
+            
+            durationView.topAnchor.constraint(equalTo: priorityView.bottomAnchor, constant: 20),
+            durationView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+            durationView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right),
+            durationView.heightAnchor.constraint(equalToConstant: 70),
+            
+            deadlineView.topAnchor.constraint(equalTo: durationView.bottomAnchor, constant: 20),
+            deadlineView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+            deadlineView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right)
+            
         ])
-        
-//        view.addSubview(titleTextField)
-//        view.addSubview(deadlineView)
-//
-//        NSLayoutConstraint.activate([
-//            titleTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
-//            titleTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
-//            titleTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right),
-//
-//            deadlineView.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 50),
-//            deadlineView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
-//            deadlineView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right)
-//        ])
     }
     
     required init?(coder: NSCoder) {
@@ -130,30 +141,57 @@ class TaskEditorVC: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        guard let name = titleTextField.text else {
-            return
-        }
-        if name == "" {
-            return
-        }
+        super.viewWillDisappear(animated)
         
-        // let timeTicks = durationPicker.currentTimeTicks()
-        let deadline = deadlinePicker.date
+        let currentUser = Authentication.shared.currentUser!
+        
+        guard let name = titleTextField.text else { return }
+        if name == "" { return }
+        
+        let prevIsPriority = currentTask.isPriority
         
         currentTask.name = name
-        // currentTask.timeTicks = timeTicks
-        currentTask.deadline = deadline
+        currentTask.deadline = deadlinePicker.date
+        currentTask.isPriority = prioritySwitch.isOn
         
         if isNewTask {
-            Authentication.shared.currentUser!.tasks.append(currentTask)
-        }
-        
-        if currentTask.timeTicks == 0 {
-            // Then remove the current task
-            let index = Authentication.shared.currentUser!.tasks.firstIndex { task in
-                return task.id == currentTask.id
+            if currentTask.timeTicks == 0 {
+                return
+            } else if currentTask.isPriority {
+                currentUser.priorityTasks.append(currentTask)
+            } else {
+                currentUser.regularTasks.append(currentTask)
             }
-            Authentication.shared.currentUser!.tasks.remove(at: index!)
+        } else {
+            if currentTask.timeTicks == 0 {
+                if prevIsPriority {
+                    let index = currentUser.priorityTasks.firstIndex { task in
+                        task.id == currentTask.id
+                    }
+                    currentUser.priorityTasks.remove(at: index!)
+                } else {
+                    let index = currentUser.regularTasks.firstIndex { task in
+                        task.id == currentTask.id
+                    }
+                    currentUser.regularTasks.remove(at: index!)
+                }
+            } else if prevIsPriority != currentTask.isPriority {
+                if prevIsPriority {
+                    // move to regular tasks
+                    let index = currentUser.priorityTasks.firstIndex { task in
+                        task.id == currentTask.id
+                    }
+                    currentUser.priorityTasks.remove(at: index!)
+                    currentUser.regularTasks.append(currentTask)
+                } else {
+                    // move to priority tasks
+                    let index = currentUser.regularTasks.firstIndex { task in
+                        task.id == currentTask.id
+                    }
+                    currentUser.regularTasks.remove(at: index!)
+                    currentUser.priorityTasks.append(currentTask)
+                }
+            }
         }
         
         tableView.reloadData()

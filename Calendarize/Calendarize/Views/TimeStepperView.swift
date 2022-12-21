@@ -21,6 +21,8 @@ class TimeStepperView: UIStackView {
     
     let timeLabel: UILabel = {
         let lbl = UILabel()
+        lbl.font = .systemFont(ofSize: 13, weight: .medium)
+
         
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
@@ -64,7 +66,7 @@ class TimeStepperView: UIStackView {
         
         NSLayoutConstraint.activate([
             self.widthAnchor.constraint(equalToConstant: 40),
-            self.heightAnchor.constraint(equalToConstant: 65),
+            self.heightAnchor.constraint(equalToConstant: 57),
             
             timeLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
             timeLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),

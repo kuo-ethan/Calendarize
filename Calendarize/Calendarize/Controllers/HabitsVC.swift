@@ -36,13 +36,19 @@ class HabitsVC: UIViewController {
         
         // let id = UUID() // Just to enable same instance descriptions
         
-        let text: String
+        // let text: String
+        let dayOfWeek: String
+        let timeWindowDescription: String
+        let duration: String
         let image: UIImage
         let associatedHabitType: String
         let associatedHabitID: UUID
         
-        init(withDescription text: String, withImage sfSymbol: UIImage, forHabitType habitType: String, associatedHabitID: UUID) {
-            self.text = text
+        init(dayOfWeek: String, timeWindowDescription: String, duration: String, withImage sfSymbol: UIImage, forHabitType habitType: String, associatedHabitID: UUID) {
+            // self.text = text
+            self.dayOfWeek = dayOfWeek
+            self.timeWindowDescription = timeWindowDescription
+            self.duration = duration
             self.image = sfSymbol
             self.associatedHabitType = habitType
             self.associatedHabitID = associatedHabitID
@@ -66,7 +72,7 @@ class HabitsVC: UIViewController {
         layoutConfig.backgroundColor = .white
         
         // Define right-to-left swipe action
-        layoutConfig.trailingSwipeActionsConfigurationProvider = { [unowned self] (indexPath) in
+        layoutConfig.leadingSwipeActionsConfigurationProvider = { [unowned self] (indexPath) in
             
             // Configure swipe action here
             guard let item = dataSource.itemIdentifier(for: indexPath) else {
@@ -117,7 +123,8 @@ class HabitsVC: UIViewController {
             // Set symbolItem's data to cell
             var content = cell.defaultContentConfiguration()
             content.image = symbolItem.image
-            content.text = symbolItem.text
+            content.text = "\(symbolItem.dayOfWeek), \(symbolItem.duration)"
+            content.secondaryText = symbolItem.timeWindowDescription
             cell.contentConfiguration = content
             // cell.tintColor = .primary
         }
@@ -183,7 +190,7 @@ class HabitsVC: UIViewController {
                 }
                 let timeInterval = "\(instance.dayInterval.startTime.toString()) - \(instance.dayInterval.endTime.toString())"
                 let description = "\(dayOfWeek) | \(timeInterval) | \(duration)"
-                instanceItems.append(InstanceItem(withDescription: description, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
+                instanceItems.append(InstanceItem(dayOfWeek: dayOfWeek, timeWindowDescription: timeInterval, duration: duration, withImage: UIImage(systemName: sfSymbolName)!, forHabitType: habitType, associatedHabitID: instance.id))
             }
             
             headerItems.append(HeaderItem(title: currentType, instances: instanceItems))

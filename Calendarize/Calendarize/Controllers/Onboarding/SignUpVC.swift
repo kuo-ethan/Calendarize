@@ -32,7 +32,7 @@ class SignUpVC: UIViewController {
     
     private let titleSecLabel: UILabel = {
         let lbl = UILabel()
-        lbl.text = "Optimize your schedule today"
+        lbl.text = "Calendarize your tasks today"
         lbl.textColor = .secondaryText
         lbl.font = .systemFont(ofSize: 17, weight: .medium)
         

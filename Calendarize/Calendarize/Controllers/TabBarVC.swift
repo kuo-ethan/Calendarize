@@ -29,12 +29,6 @@ class TabBarVC: UITabBarController {
     
     let wrappedTasksVC: UINavigationController = {
         let tasksVC = TasksVC()
-        // Set up the data source array for tasks vc
-//        let allTasks = Authentication.shared.currentUser!.tasks
-//        for task in allTasks {
-//            if 
-//        }
-        // tasksVC.tasksForTableView = []
         TasksVC.shared = tasksVC
         let wrappedTasksVC = UINavigationController(rootViewController: tasksVC)
         wrappedTasksVC.title = "Tasks"
