@@ -29,6 +29,12 @@ class TabBarVC: UITabBarController {
     
     let wrappedTasksVC: UINavigationController = {
         let tasksVC = TasksVC()
+        // Set up the data source array for tasks vc
+//        let allTasks = Authentication.shared.currentUser!.tasks
+//        for task in allTasks {
+//            if 
+//        }
+        // tasksVC.tasksForTableView = []
         TasksVC.shared = tasksVC
         let wrappedTasksVC = UINavigationController(rootViewController: tasksVC)
         wrappedTasksVC.title = "Tasks"
@@ -63,10 +69,6 @@ class TabBarVC: UITabBarController {
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         if item == tabBar.items?[0] {
             Database.shared.updateUser(Authentication.shared.currentUser!, nil)
-            for task in Authentication.shared.currentUser!.tasks {
-                print(task.toString())
-            }
-            print("===================")
         } else if item == tabBar.items?[1] {
             TasksVC.shared.tableView.reloadData()
             wrappedHomeVC.popToRootViewController(animated: false)

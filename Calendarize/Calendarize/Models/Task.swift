@@ -9,12 +9,14 @@ import Foundation
 
 typealias TimeTicks = Int
 
-class Task: Codable {
+class Task: Codable, Identifiable {
     
     init(name: String, timeTicks: TimeTicks, deadline: Date) {
         self.name = name
         self.timeTicks = timeTicks
         self.deadline = deadline
+        
+        // self.isPriority = false
     }
     
     var name: String
@@ -23,6 +25,8 @@ class Task: Codable {
     var timeTicks: TimeTicks
     
     var deadline: Date
+    
+    // var isPriority: Bool
     
     func toString() -> String {
         return "\(name) takes \(timeTicks) timeticks"

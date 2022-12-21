@@ -20,7 +20,7 @@ extension UIColor {
     
     public static let taskEventColor = UIColor(hex: "#e0e0e0")!
     
-    public static let commitmentEventColor = UIColor(hex: "#ff5552")!
+    public static let habitEventColor = UIColor(hex: "#ff5552")!
     
     public static let background = UIColor.white
 }

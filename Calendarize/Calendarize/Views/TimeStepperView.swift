@@ -91,10 +91,6 @@ class TimeStepperView: UIStackView {
         }
         associatedTask.timeTicks += 1
         timeLabel.text = Utility.timeTicksToStringInHours(associatedTask.timeTicks)
-        for task in Authentication.shared.currentUser!.tasks {
-            print(task.toString())
-        }
-        print("===================")
     }
     
     @objc func didTapDecrement() {
@@ -103,12 +99,7 @@ class TimeStepperView: UIStackView {
             return
         }
         associatedTask.timeTicks -= 1
-        // Database.shared.updateUser(Authentication.shared.currentUser!, nil)
         timeLabel.text = Utility.timeTicksToStringInHours(associatedTask.timeTicks)
-        for task in Authentication.shared.currentUser!.tasks {
-            print(task.toString())
-        }
-        print("===================")
     }
     
     func currentTimeTicks() -> TimeTicks {

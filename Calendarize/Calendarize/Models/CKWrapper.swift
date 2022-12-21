@@ -49,7 +49,7 @@ final class CKWrapper: EventDescriptor {
             if ckEvent.isTask {
                 return UIColor.taskEventColor
             } else {
-                return UIColor.commitmentEventColor
+                return UIColor.habitEventColor
             }
         }
     }

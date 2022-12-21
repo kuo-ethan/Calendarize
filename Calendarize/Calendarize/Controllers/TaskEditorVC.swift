@@ -22,7 +22,7 @@ class TaskEditorVC: UIViewController {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.distribution = .equalSpacing
-        stack.spacing = 25
+        stack.spacing = 50
         
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
@@ -35,7 +35,7 @@ class TaskEditorVC: UIViewController {
         return tf
     }()
     
-    let durationPickerTitle = TitleLabel(withText: "Duration", ofSize: DEFAULT_FONT_SIZE-2)
+    let durationPickerTitle = TitleLabel(withText: "Hours", ofSize: DEFAULT_FONT_SIZE-2)
     
     let durationPicker: TimeStepperView!
     
@@ -102,18 +102,27 @@ class TaskEditorVC: UIViewController {
         stack.addArrangedSubview(deadlineView)
         
         view.addSubview(stack)
-        
+
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor,
                                            constant: contentEdgeInset.left),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor,
                                             constant: -contentEdgeInset.right),
-//            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor,
-//                                       constant: 0),
-//            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor,
-//                                       constant: -100),
             stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20)
         ])
+        
+//        view.addSubview(titleTextField)
+//        view.addSubview(deadlineView)
+//
+//        NSLayoutConstraint.activate([
+//            titleTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+//            titleTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+//            titleTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right),
+//
+//            deadlineView.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 50),
+//            deadlineView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: contentEdgeInset.left),
+//            deadlineView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -contentEdgeInset.right)
+//        ])
     }
     
     required init?(coder: NSCoder) {
@@ -137,6 +146,14 @@ class TaskEditorVC: UIViewController {
         
         if isNewTask {
             Authentication.shared.currentUser!.tasks.append(currentTask)
+        }
+        
+        if currentTask.timeTicks == 0 {
+            // Then remove the current task
+            let index = Authentication.shared.currentUser!.tasks.firstIndex { task in
+                return task.id == currentTask.id
+            }
+            Authentication.shared.currentUser!.tasks.remove(at: index!)
         }
         
         tableView.reloadData()

@@ -13,6 +13,10 @@ class TasksVC: UITableViewController {
     // The shared TasksVC for the current user
     static var shared: TasksVC!
     
+    // tasksForTableView[0] contains all priority tasks
+    // tasksForTableView[1] contains all non-priority tasks
+    // var tasksForTableView: [[Task]] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -22,7 +26,11 @@ class TasksVC: UITableViewController {
         navigationItem.rightBarButtonItem = plusButton
         tableView.register(TaskCell.self, forCellReuseIdentifier: TaskCell.reuseIdentifier)
     }
-        
+    
+//    override func numberOfSections(in tableView: UITableView) -> Int {
+//        return 2
+//    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return Authentication.shared.currentUser!.tasks.count
     }
@@ -43,6 +51,16 @@ class TasksVC: UITableViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
+    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let doneAction = UIContextualAction(style: .normal, title:  "Done", handler: { (ac: UIContextualAction, view: UIView, success: (Bool) -> Void) in
+            Authentication.shared.currentUser!.tasks.remove(at: indexPath.item)
+            tableView.reloadData()
+            success(true)
+        })
+        doneAction.backgroundColor = .systemGreen
+        return UISwipeActionsConfiguration(actions: [doneAction])
+    }
+    
     @objc func didTapCreateNewTask() {
         let newTask = Task(name: "", timeTicks: 1, deadline: Date())
         let vc = TaskEditorVC(withInitialTask: newTask, tableView: tableView, isNewTask: true)
@@ -61,7 +79,7 @@ class TasksVC: UITableViewController {
 class TaskCell: UITableViewCell {
     static let reuseIdentifier = "TaskCell"
     
-    let timeStepper = TimeStepperView()
+    let timeStepper = AutoDeleteTimeStepperView()
     
     let taskLabel = ContentLabel(withText: "", ofSize: 18)
     
@@ -113,6 +131,21 @@ class TaskCell: UITableViewCell {
         // Run algorithm
         // Add new schedule
     }
+}
+
+class AutoDeleteTimeStepperView: TimeStepperView {
+    // Now, tapping decrement can actually delete a task from currentUser.
     
-    
+    override func didTapDecrement() {
+        super.didTapDecrement()
+        
+        if associatedTask.timeTicks == 0 {
+            // Then remove the current task
+            let index = Authentication.shared.currentUser!.tasks.firstIndex { task in
+                return task.id == associatedTask.id
+            }
+            Authentication.shared.currentUser!.tasks.remove(at: index!)
+        }
+        TasksVC.shared.tableView.reloadData()
+    }
 }
