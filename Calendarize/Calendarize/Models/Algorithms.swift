@@ -15,7 +15,7 @@ func calendarize1(W: [Work], H: [Habit], T: [Task]) -> [CKEvent] {
     // MARK: Preprocesing
     // Add priority tasks as habits
     // Sort W by start + end, H by start, T by deadline
-    // Iterate and shift, store shifted values in dictionary?
+    // Iterate and shift, store shifted values in dictionary
     
     // MARK: DP Algorithm
     
