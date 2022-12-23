@@ -212,8 +212,9 @@ class HabitEditorVC: UIViewController {
         customTagTextField.text = ""
     }
     
-    // Returns whether this habit in isolation is completable.
-    private func validateHabit(habit: Habit) -> Bool {
+    // Returns whether this habit is feasible and non-overlapping.
+    private func validate(newHabit habit: Habit, among existingHabits: [Habit]) -> Bool {
+        // Check feasibility
         let start = habit.dayInterval.startTime
         let end = habit.dayInterval.endTime
         let interval = (end.hour * 60 + end.minutes) - (start.hour * 60 + start.minutes)
@@ -224,9 +225,19 @@ class HabitEditorVC: UIViewController {
         } else if interval < habit.minutes {
             print("ERROR: Habit cannot be completed in the time period.")
             return false
-        } else {
-            return true
         }
+        
+        // Check overlap
+        for existingHabit in existingHabits {
+            let existingStart = existingHabit.dayInterval.startTime
+            let existingEnd = existingHabit.dayInterval.endTime
+            if (existingStart < start && start < existingEnd) || (existingStart < end && end < existingEnd) || (start < existingStart && existingEnd < end) {
+                print("ERROR: Habit time interval cannot overlap an existing habit.")
+                return false
+            }
+        }
+        
+        return true
     }
     
     private func saveHabit() {
@@ -249,9 +260,14 @@ class HabitEditorVC: UIViewController {
         
         guard let currentUser = Authentication.shared.currentUser else { return }
         
-        // MARK: Need to check that these habit instances are valid.
+        // MARK: Need to check that these habit instances are feasible and non-overlapping.
+        var existingHabits: [Habit] = []
+        for habitType in currentUser.habits.keys {
+            existingHabits.append(contentsOf: currentUser.habits[habitType]!)
+            
+        }
         for habit in instances {
-            if !validateHabit(habit: habit) {
+            if !validate(newHabit: habit, among: existingHabits) {
                 return
             }
         }
