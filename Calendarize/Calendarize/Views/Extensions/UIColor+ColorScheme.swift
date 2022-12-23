@@ -18,9 +18,13 @@ extension UIColor {
     
     public static let tertiaryText = UIColor(hex: "#82878f")!
     
-    public static let taskEventColor = UIColor(hex: "#e0e0e0")!
+    public static let habitEventColor = UIColor.systemYellow
     
-    public static let habitEventColor = UIColor(hex: "#ff5552")!
+    public static let imminentTaskEventColor = UIColor.systemMint
+    
+    public static let priorityTaskEventColor = UIColor.systemPink
+    
+    public static let checkpointEventColor = UIColor.systemGreen
     
     public static let busynessIndexBackgroundColor = UIColor(hex: "#f0f0f0")!
     

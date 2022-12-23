@@ -82,14 +82,22 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
         let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
         
-        let predicate = eventStore.predicateForEvents(withStart: startDate, // Start of the current day
-                                                      end: endDate, // Start of the next day
-                                                      calendars: nil) // Search in all calendars
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         
-        let eventKitEvents = eventStore.events(matching: predicate) // All events happening on a given day
+        let eventKitEvents = eventStore.events(matching: predicate)
+        
         let calendarKitEvents = eventKitEvents.map(EKWrapper.init)
         
-        return calendarKitEvents
+        // MARK: Testing CKEvents
+        let habit = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Habit", type: .Habit)
+        let imminentTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "An Imminent Task", type: .ImminentTask)
+        let priorityTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Priority Habit", type: .PriorityTask)
+        let checkpoint = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Checkpoint", type: .Checkpoint)
+        let testEvents = [habit, imminentTask, priorityTask, checkpoint].map(CKWrapper.init)
+        
+        return calendarKitEvents + testEvents
+        
+        // return calendarKitEvents
     }
     
     // MARK: - DayViewDelegate
@@ -197,24 +205,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     @objc private func didTapRefresh() {
-        Authentication.shared.currentUser!.ckEvents = calendarize()
+        // Authentication.shared.currentUser!.ckEvents = calendarize()
         reloadData()
-    }
-    
-    // MARK: The main algorithm. Given EKEvents, commitments, tasks, start and end date, return CKEvents list
-    private func calendarize() -> [CKEvent] {
-        // MARK: Setup
-        var ckEvents: [CKEvent] = []
-        // let startDate = ____ // round up to nearest multiple of 5
-        // let endDate = ____ // last deadline
-        // let ekEvents = eventStore...
-        
-        // MARK: Preprocesing
-        
-        // MARK: DP Algorithm
-        
-        // MARK: Postprocessing
-        
-        return ckEvents
     }
 }

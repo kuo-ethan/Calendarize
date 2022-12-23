@@ -52,6 +52,8 @@
 		CBAB2D3A294BD1E5001876DD /* HabitsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D39294BD1E5001876DD /* HabitsVC.swift */; };
 		CBAB2D3C294BD237001876DD /* HabitEditorVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */; };
 		CBAB2D3F294BD284001876DD /* TagListView in Frameworks */ = {isa = PBXBuildFile; productRef = CBAB2D3E294BD284001876DD /* TagListView */; };
+		CBDD74B02955B9CA0035D138 /* Algorithms.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBDD74AF2955B9CA0035D138 /* Algorithms.swift */; };
+		CBDD74B22955B9F50035D138 /* Work.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBDD74B12955B9F50035D138 /* Work.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -93,6 +95,8 @@
 		CBAB2D37294BCFD2001876DD /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
 		CBAB2D39294BD1E5001876DD /* HabitsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsVC.swift; sourceTree = "<group>"; };
 		CBAB2D3B294BD237001876DD /* HabitEditorVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitEditorVC.swift; sourceTree = "<group>"; };
+		CBDD74AF2955B9CA0035D138 /* Algorithms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Algorithms.swift; sourceTree = "<group>"; };
+		CBDD74B12955B9F50035D138 /* Work.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Work.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +156,7 @@
 			isa = PBXGroup;
 			children = (
 				CBAB2CEC294A96FC001876DD /* EKWrapper.swift */,
+				CBDD74B12955B9F50035D138 /* Work.swift */,
 				CBAB2D1A294BA3AC001876DD /* CKWrapper.swift */,
 				CBAB2D06294AEAA6001876DD /* Utility.swift */,
 				CBAB2D08294AEB51001876DD /* User.swift */,
@@ -160,6 +165,7 @@
 				CBAB2D18294AEF46001876DD /* DayInterval.swift */,
 				CBAB2D13294AEECC001876DD /* Database.swift */,
 				CBAB2D16294AEF0B001876DD /* Authentication.swift */,
+				CBDD74AF2955B9CA0035D138 /* Algorithms.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -322,6 +328,7 @@
 				CBAB2D23294BB19A001876DD /* HorizontalActionLabel.swift in Sources */,
 				CBAB2CD7294A9218001876DD /* HomeVC.swift in Sources */,
 				CBAB2D07294AEAA6001876DD /* Utility.swift in Sources */,
+				CBDD74B02955B9CA0035D138 /* Algorithms.swift in Sources */,
 				CBAB2D33294BB700001876DD /* TaskEditorVC.swift in Sources */,
 				CBAB2D2C294BB4E2001876DD /* TabBarVC.swift in Sources */,
 				CBAB2D05294AE9E4001876DD /* TimeStepperView.swift in Sources */,
@@ -334,6 +341,7 @@
 				CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */,
 				CB66D5D22952D85700617B47 /* CircularProgressBarView.swift in Sources */,
 				CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */,
+				CBDD74B22955B9F50035D138 /* Work.swift in Sources */,
 				CBAB2D2E294BB5D9001876DD /* TasksVC.swift in Sources */,
 				CBAB2D09294AEB51001876DD /* User.swift in Sources */,
 				CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */,

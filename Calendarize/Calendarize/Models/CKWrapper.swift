@@ -11,12 +11,16 @@ import Foundation
 import CalendarKit
 import UIKit
 
+// All types of calendar kit events.
+enum CKEventType: String, Codable {
+    case Habit, PriorityTask, ImminentTask, Checkpoint
+}
 // An event only to be displayed in calendar kit.
 struct CKEvent: Codable {
     var startDate: Date
     var endDate: Date
     var title: String
-    let isTask: Bool
+    let type: CKEventType
 }
 
 final class CKWrapper: EventDescriptor {
@@ -46,10 +50,15 @@ final class CKWrapper: EventDescriptor {
     public var lineBreakMode: NSLineBreakMode?
     public var color: UIColor {
         get {
-            if ckEvent.isTask {
-                return UIColor.taskEventColor
-            } else {
-                return UIColor.habitEventColor
+            switch (ckEvent.type) {
+            case .Habit:
+                return .habitEventColor
+            case.ImminentTask:
+                return .imminentTaskEventColor
+            case.PriorityTask:
+                return .priorityTaskEventColor
+            case.Checkpoint:
+                return .checkpointEventColor
             }
         }
     }
