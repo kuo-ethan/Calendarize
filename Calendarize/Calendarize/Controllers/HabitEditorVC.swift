@@ -214,7 +214,6 @@ class HabitEditorVC: UIViewController {
     
     // Returns whether this habit is feasible and non-overlapping.
     private func validate(newHabit habit: Habit, among existingHabits: [Habit]) -> Bool {
-        // Check feasibility
         let start = habit.dayInterval.startTime
         let end = habit.dayInterval.endTime
         let interval = (end.hour * 60 + end.minutes) - (start.hour * 60 + start.minutes)
