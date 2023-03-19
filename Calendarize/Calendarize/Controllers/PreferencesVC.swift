@@ -43,7 +43,7 @@ class PreferencesVC: UIViewController {
     }()
     
     let wakeUpTimeLabel: UILabel = {
-        let label = TitleLabel(withText: "Wake up time:", ofSize: DEFAULT_FONT_SIZE)
+        let label = TitleLabel(withText: "Wake time:", ofSize: DEFAULT_FONT_SIZE)
         label.translatesAutoresizingMaskIntoConstraints = false
         
         return label
@@ -80,6 +80,15 @@ class PreferencesVC: UIViewController {
         return dp
     }()
     
+    let breakTimeLabel: UILabel = {
+        let label = TitleLabel(withText: "Break range:", ofSize: DEFAULT_FONT_SIZE)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        return label
+    }()
+    
+    // TODO: Make custom view for break range selector
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,10 +113,12 @@ class PreferencesVC: UIViewController {
         bedTimeStack.addArrangedSubview(bedTimeSelector)
         bedTimeStack.translatesAutoresizingMaskIntoConstraints = false
         
+        
         view.addSubview(productivityStyleLabel)
         view.addSubview(productivityStyleList)
         view.addSubview(wakeUpStack)
         view.addSubview(bedTimeStack)
+        view.addSubview(breakTimeLabel)
         
         NSLayoutConstraint.activate([
             productivityStyleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
@@ -124,7 +135,10 @@ class PreferencesVC: UIViewController {
             
             bedTimeStack.topAnchor.constraint(equalTo: wakeUpStack.bottomAnchor, constant: 10),
             bedTimeStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            bedTimeStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            bedTimeStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            breakTimeLabel.topAnchor.constraint(equalTo: bedTimeStack.bottomAnchor, constant: 20),
+            breakTimeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            breakTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
     }
     

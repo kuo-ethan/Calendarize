@@ -24,6 +24,7 @@ class User: Codable {
         self.ckEvents = []
         self.awakeInterval  = DayInterval(startTime: Time(fromString: "8:00 AM"), endTime: Time(fromString: "10:00 PM"))
         self.productivityStyle = .Dynamic
+        self.breakRange = [2, 6]
     }
     
     @DocumentID var uid: UserID?
@@ -47,6 +48,8 @@ class User: Codable {
     var awakeInterval: DayInterval
     
     var productivityStyle: ProductivityStyle
+    
+    var breakRange: [Int]
     
     // MARK: Defaults to nil, update when calendar generated
     var busynessIndex: Int?

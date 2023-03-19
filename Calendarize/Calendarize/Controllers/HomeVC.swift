@@ -205,7 +205,23 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     @objc private func didTapRefresh() {
-        // Authentication.shared.currentUser!.ckEvents = calendarize()
+        let startDate = Date()
+        var oneDayComponents = DateComponents()
+        oneDayComponents.day = 2
+        // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
+        let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
+        let eventKitEvents = eventStore.events(matching: predicate)
+        let currentUser = Authentication.shared.currentUser!
+        
+        // currentUser.ckEvents = taskSchedulingWithDurations(with: eventKitEvents, for: currentUser)
         reloadData()
+    }
+    
+    // MARK: Algorithms below here
+    private func taskSchedulingWithDurations(with events: [EKEvent], for user: User) -> [CKEvent]{
+        var ckEvents: [CKEvent] = []
+        
+        return ckEvents
     }
 }
