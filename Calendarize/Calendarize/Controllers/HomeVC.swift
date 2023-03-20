@@ -213,6 +213,29 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     // MARK: Algorithms below here
+    
+    class MinuteItem: CustomStringConvertible {
+        let title: String
+        let pointer: Any?
+        
+        var description: String {
+            if let pointer {
+                return "\(title) \(String(describing: pointer))"
+            } else {
+                return title
+            }
+        }
+        
+        init(title: String, pointer: Any?) {
+            self.title = title
+            self.pointer = pointer
+        }
+
+    }
+    
+    let AVAILABLE = MinuteItem(title: "available", pointer: nil)
+    let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
+    let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
     private func calendarizeOPT(from startDate: Date, for user: User) -> [CKEvent] {
         var ckEvents: [CKEvent] = []
         
@@ -227,28 +250,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let events = eventStore.events(matching: predicate)
         
         // Create big array.
-        class MinuteItem: CustomStringConvertible {
-            let title: String
-            let pointer: Any?
-            
-            var description: String {
-                if let pointer {
-                    return "\(title) \(String(describing: pointer))"
-                } else {
-                    return title
-                }
-            }
-            
-            init(title: String, pointer: Any?) {
-                self.title = title
-                self.pointer = pointer
-            }
-
-        }
-        
-        let AVAILABLE = MinuteItem(title: "available", pointer: nil)
-        let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
-        let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
         var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
 
         // MARK: Sleep (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
@@ -305,17 +306,16 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 while i >= startIndex {
                     if schedule[i] === AVAILABLE {
                         streak += 1
+                        if streak == habit.minutes {
+                            // Found continuous period where habit can be completed
+                            let habitItem = MinuteItem(title: "habit", pointer: habit)
+                            for j in 0..<streak {
+                                schedule[i + j] = habitItem
+                            }
+                            i = (Int.min + 1) // Exit the loop
+                        }
                     } else {
                         streak = 0
-                    }
-                    
-                    if streak == habit.minutes {
-                        // Found continuous period where habit can be completed
-                        let habitItem = MinuteItem(title: "habit", pointer: habit)
-                        for j in 0..<streak {
-                            schedule[i + j] = habitItem
-                        }
-                        break
                     }
                     i -= 1
                 }
@@ -323,15 +323,76 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         
         // MARK: Priority Tasks
-        
+        taskSchedulingWithDurations(for: user.priorityTasks, into: &schedule, startingAtDate: startDate)
         
         print(schedule)
         return ckEvents
     }
     
     // MARK: Given tasks with deadline and duration and a schedule, add the tasks to the schedule such that the maximum number of deadlines are met.
-    private func taskSchedulingWithDurations() {
+    private func taskSchedulingWithDurations(for tasks: [Task], into schedule: inout [MinuteItem], startingAtDate startDate: Date) {
+        let sortedTasks = tasks.sorted { a, b in
+            return a.deadline.compare(b.deadline) == .orderedAscending
+        }
+        let N = sortedTasks.count
+        if N == 0 {
+            return
+        }
+        let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
         
+        // Top-down DP.
+        // Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes of the schedule.
+        func subproblem(i: Int, j: Int) -> [Int] {
+            // Base case
+            if i == 0 || j == 0 {
+                return []
+            }
+            
+            let without_last_task = subproblem(i: i-1, j: j)
+            var minutesForLastTask = sortedTasks[i].timeTicks * 30
+            
+            // Compute how many minutes it takes to backload the last task
+            var index = j
+            while index >= 0 {
+                if minutesForLastTask == 0 {
+                    // Index is the starting point for scheduling the next task
+                    let with_last_task = subproblem(i: i-1, j: index) + [i]
+                    // Return the choice that has more tasks completed
+                    if without_last_task.count >= with_last_task.count {
+                        // Note that if =, then we should return the schedule without the last task because it's the least urgent (latest deadline)
+                        return without_last_task
+                    } else {
+                        return with_last_task
+                    }
+                }
+                if schedule[index] === AVAILABLE {
+                    minutesForLastTask -= 1
+                }
+                index -= 1
+            }
+            
+            // Impossible to complete the last task
+            return without_last_task
+        }
+        
+        // Now update the schedule
+        let optimalTaskIndices = subproblem(i: N, j: d_N).reversed()
+        
+        print("\(optimalTaskIndices.count) out of \(N) tasks were scheduled.")
+        
+        var i = d_N
+        for taskIndex in optimalTaskIndices {
+            let currTask = sortedTasks[taskIndex]
+            var currMinutes = (currTask.timeTicks * 30)
+            let currTaskItem = MinuteItem(title: "task", pointer: currTask)
+            while currMinutes > 0 {
+                if schedule[i] === AVAILABLE {
+                    schedule[i] = currTaskItem
+                    currMinutes -= 1
+                }
+                i -= 1
+            }
+        }
     }
     
     // Rounds date object to the next five munutes
