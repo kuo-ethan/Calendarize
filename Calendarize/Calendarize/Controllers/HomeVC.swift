@@ -95,9 +95,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let checkpoint = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Checkpoint", type: .Checkpoint)
         let testEvents = [habit, imminentTask, priorityTask, checkpoint].map(CKWrapper.init)
         
-        return calendarKitEvents + testEvents
+        // return calendarKitEvents + testEvents
         
-        // return calendarKitEvents
+        return calendarKitEvents
     }
     
     // MARK: - DayViewDelegate
@@ -205,23 +205,145 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     @objc private func didTapRefresh() {
-        let startDate = Date()
-        var oneDayComponents = DateComponents()
-        oneDayComponents.day = 2
-        // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
-        let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
-        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
-        let eventKitEvents = eventStore.events(matching: predicate)
+        let startDate = round(Date())
         let currentUser = Authentication.shared.currentUser!
         
-        // currentUser.ckEvents = taskSchedulingWithDurations(with: eventKitEvents, for: currentUser)
+        currentUser.ckEvents = calendarizeOPT(from: startDate, for: currentUser)
         reloadData()
     }
     
     // MARK: Algorithms below here
-    private func taskSchedulingWithDurations(with events: [EKEvent], for user: User) -> [CKEvent]{
+    private func calendarizeOPT(from startDate: Date, for user: User) -> [CKEvent] {
         var ckEvents: [CKEvent] = []
         
+        let calendar = Calendar.current
+        var twoDayComponents = DateComponents()
+        twoDayComponents.day = 2
+        let twoDaysAway = calendar.date(byAdding: twoDayComponents, to: startDate)!
+        let endDate = calendar.startOfDay(for: twoDaysAway)
+        
+        // Get EK events from now to the end of tomorrow
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
+        let events = eventStore.events(matching: predicate)
+        
+        // Create big array.
+        class MinuteItem: CustomStringConvertible {
+            let title: String
+            let pointer: Any?
+            
+            var description: String {
+                if let pointer {
+                    return "\(title) \(String(describing: pointer))"
+                } else {
+                    return title
+                }
+            }
+            
+            init(title: String, pointer: Any?) {
+                self.title = title
+                self.pointer = pointer
+            }
+
+        }
+        
+        let AVAILABLE = MinuteItem(title: "available", pointer: nil)
+        let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
+        let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
+        var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
+
+        // MARK: Sleep (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
+        var oneDayComponents = DateComponents()
+        oneDayComponents.day = 1
+        var temp = calendar.date(byAdding: oneDayComponents, to: startDate)!
+        temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
+        let bedTimeIndex = minutes(from: startDate, to: temp)
+        temp = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: temp)!
+        let wakeIndex = minutes(from: startDate, to: temp)
+        for i in bedTimeIndex...wakeIndex {
+            schedule[i] = ASLEEP
+        }
+        
+        // MARK: Events
+        for event in events {
+            let startIndex = max(0, minutes(from: startDate, to: event.startDate))
+            let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
+            for i in startIndex...endIndex {
+                schedule[i] = UNAVAILABLE
+            }
+        }
+        
+        // MARK: Habits
+        // Sunday = 0, Monday = 1, ...
+        let todaysDayIndex = calendar.dateComponents([.weekday], from: startDate).weekday! - 1
+        let todaysDay = DayOfWeek(rawValue: todaysDayIndex)
+        let tomorrowsDay = DayOfWeek(rawValue: todaysDayIndex + 1)
+        for type in user.habits.keys {
+            for habit in user.habits[type]! {
+                // Create a reference date for the start of the habit's respective date
+                var referenceDateStart: Date!
+                if habit.dayOfWeek == todaysDay {
+                    referenceDateStart = calendar.startOfDay(for: startDate)
+                } else if habit.dayOfWeek == tomorrowsDay {
+                    let temp = calendar.date(byAdding: oneDayComponents, to: startDate)!
+                    referenceDateStart = calendar.startOfDay(for: temp)
+                } else {
+                    continue
+                }
+                
+                // Get dates for the start and end of habit
+                let startTime = habit.dayInterval.startTime
+                let endTime = habit.dayInterval.endTime
+                let habitStartDate = calendar.date(byAdding: .minute, value: startTime.hour * 60 + startTime.minutes, to: referenceDateStart)!
+                let habitEndDate = calendar.date(byAdding: .minute, value: endTime.hour * 60 + endTime.minutes, to: referenceDateStart)!
+                
+                // Add the habit into the array
+                let startIndex = minutes(from: startDate, to: habitStartDate)
+                let endIndex = minutes(from: startDate, to: habitEndDate)
+                
+                var i = endIndex
+                var streak = 0
+                while i >= startIndex {
+                    if schedule[i] === AVAILABLE {
+                        streak += 1
+                    } else {
+                        streak = 0
+                    }
+                    
+                    if streak == habit.minutes {
+                        // Found continuous period where habit can be completed
+                        let habitItem = MinuteItem(title: "habit", pointer: habit)
+                        for j in 0..<streak {
+                            schedule[i + j] = habitItem
+                        }
+                        break
+                    }
+                    i -= 1
+                }
+            }
+        }
+        
+        // MARK: Priority Tasks
+        
+        
+        print(schedule)
         return ckEvents
     }
+    
+    // MARK: Given tasks with deadline and duration and a schedule, add the tasks to the schedule such that the maximum number of deadlines are met.
+    private func taskSchedulingWithDurations() {
+        
+    }
+    
+    // Rounds date object to the next five munutes
+    private func round(_ date: Date) -> Date {
+        let seconds: TimeInterval = ceil(date.timeIntervalSinceReferenceDate/300.0)*300.0
+        return Date(timeIntervalSinceReferenceDate: seconds)
+    }
+    
+    // Returns (in minutes) the time between two Dates
+    private func minutes(from startDate: Date, to endDate: Date) -> Int {
+        let diffSeconds = Int(endDate.timeIntervalSince1970 - startDate.timeIntervalSince1970)
+        return diffSeconds / 60
+    }
 }
+

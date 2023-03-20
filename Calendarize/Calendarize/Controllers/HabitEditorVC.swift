@@ -254,7 +254,7 @@ class HabitEditorVC: UIViewController {
         for index in dayTagsDelegate.selectedDayIndices {
             // create a commitment instance for that day
             let dayOfWeek = DayOfWeek(rawValue: index)!
-            instances.append(Habit(id: UUID(), minutes: minutes, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
+            instances.append(Habit(id: UUID(), type: currentHabitType, minutes: minutes, dayOfWeek: dayOfWeek, dayInterval: timeFrame))
         }
         
         guard let currentUser = Authentication.shared.currentUser else { return }

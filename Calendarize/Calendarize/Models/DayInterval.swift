@@ -13,9 +13,13 @@ struct DayInterval: Codable {
     
     let endTime: Time
     
+    var length: Int {
+        return (endTime.hour * 60 + endTime.minutes) - (startTime.hour * 60 + startTime.minutes)
+    }
+    
 }
 
-
+// A (hours: minutes) time in 24 hour format
 struct Time: Codable, Comparable, Equatable {
     static func < (lhs: Time, rhs: Time) -> Bool {
         return (lhs.hour * 60 + lhs.minutes) < (rhs.hour * 60 + rhs.minutes)

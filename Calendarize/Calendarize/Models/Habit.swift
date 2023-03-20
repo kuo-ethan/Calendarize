@@ -15,9 +15,15 @@ enum DayOfWeek: Int, Codable {
     case Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 
-struct Habit: Codable, Identifiable {
+struct Habit: Codable, Identifiable, CustomStringConvertible {
+    
+    var description: String {
+        return id.uuidString
+    }
     
     let id: UUID
+    
+    let type: String
     
     let minutes: Minutes
     
