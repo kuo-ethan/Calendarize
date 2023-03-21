@@ -228,11 +228,13 @@ class HabitEditorVC: UIViewController {
         
         // Check overlap
         for existingHabit in existingHabits {
-            let existingStart = existingHabit.dayInterval.startTime
-            let existingEnd = existingHabit.dayInterval.endTime
-            if (existingStart < start && start < existingEnd) || (existingStart < end && end < existingEnd) || (start < existingStart && existingEnd < end) {
-                print("ERROR: Habit time interval cannot overlap an existing habit.")
-                return false
+            if existingHabit.dayOfWeek == habit.dayOfWeek {
+                let existingStart = existingHabit.dayInterval.startTime
+                let existingEnd = existingHabit.dayInterval.endTime
+                if (existingStart < start && start < existingEnd) || (existingStart < end && end < existingEnd) || (start < existingStart && existingEnd < end) {
+                    print("ERROR: Habit time interval cannot overlap an existing habit.")
+                    return false
+                }
             }
         }
         

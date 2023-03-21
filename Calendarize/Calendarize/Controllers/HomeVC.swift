@@ -205,7 +205,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     @objc private func didTapRefresh() {
-        let startDate = round(Date())
+        let startDate = roundUp(Date())
         let currentUser = Authentication.shared.currentUser!
         
         currentUser.ckEvents = calendarizeOPT(from: startDate, for: currentUser)
@@ -236,8 +236,10 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     let AVAILABLE = MinuteItem(title: "available", pointer: nil)
     let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
     let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
+    
     private func calendarizeOPT(from startDate: Date, for user: User) -> [CKEvent] {
         var ckEvents: [CKEvent] = []
+        var droppedMessages: [String] = []
         
         let calendar = Calendar.current
         var twoDayComponents = DateComponents()
@@ -291,41 +293,66 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     continue
                 }
                 
-                // Get dates for the start and end of habit
+                // Get dates for the start and end of habit. Note that end date is an EXCLUSIVE upper bound.
                 let startTime = habit.dayInterval.startTime
                 let endTime = habit.dayInterval.endTime
                 let habitStartDate = calendar.date(byAdding: .minute, value: startTime.hour * 60 + startTime.minutes, to: referenceDateStart)!
                 let habitEndDate = calendar.date(byAdding: .minute, value: endTime.hour * 60 + endTime.minutes, to: referenceDateStart)!
                 
                 // Add the habit into the array
-                let startIndex = minutes(from: startDate, to: habitStartDate)
-                let endIndex = minutes(from: startDate, to: habitEndDate)
+                var startIndex = minutes(from: startDate, to: habitStartDate)
+                var endIndex = minutes(from: startDate, to: habitEndDate)
                 
-                var i = endIndex
+                // Only schedule habits whose full time is schedulable
+                if endIndex <= 0 {
+                    // Habit window already ended
+                    continue
+                }
+                
+                startIndex = max(0, startIndex)
+                endIndex = max(0, endIndex)
+                if endIndex - startIndex < habit.minutes {
+                    // Habit window is too small to fully complete the habit
+                    let dayOfWeek = INDEX_TO_DAY[habit.dayOfWeek.rawValue]
+                    droppedMessages.append("\(habit.type) habit on \(dayOfWeek) was dropped.")
+                    continue
+                }
+                
+                var i = endIndex - 1
                 var streak = 0
+                var iteration = 0
                 while i >= startIndex {
                     if schedule[i] === AVAILABLE {
                         streak += 1
-                        if streak == habit.minutes {
-                            // Found continuous period where habit can be completed
-                            let habitItem = MinuteItem(title: "habit", pointer: habit)
-                            for j in 0..<streak {
-                                schedule[i + j] = habitItem
-                            }
-                            i = (Int.min + 1) // Exit the loop
-                        }
                     } else {
                         streak = 0
                     }
+                    
+                    if streak == habit.minutes {
+                        // Found continuous period where habit can be completed
+                        let habitItem = MinuteItem(title: "habit", pointer: habit)
+                        for j in 0..<streak {
+                            schedule[i + j] = habitItem
+                        }
+                        break
+                    }
                     i -= 1
+                    iteration += 1
                 }
             }
         }
         
         // MARK: Priority Tasks
-        taskSchedulingWithDurations(for: user.priorityTasks, into: &schedule, startingAtDate: startDate)
+        // Preprocess the priority tasks to only include those with deadline within the two day window,
+        // and round all deadlines down to the nearest five minutes.
+        var filteredPriorityTasks = user.priorityTasks.filter { task in
+            return task.deadline.compare(endDate) == .orderedAscending
+        }
+        print(filteredPriorityTasks)
+        taskSchedulingWithDurations(for: filteredPriorityTasks, into: &schedule, startingAtDate: startDate)
         
         print(schedule)
+        print(droppedMessages)
         return ckEvents
     }
     
@@ -396,8 +423,14 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     // Rounds date object to the next five munutes
-    private func round(_ date: Date) -> Date {
+    private func roundUp(_ date: Date) -> Date {
         let seconds: TimeInterval = ceil(date.timeIntervalSinceReferenceDate/300.0)*300.0
+        return Date(timeIntervalSinceReferenceDate: seconds)
+    }
+    
+    // Rounds date object down to the next five munutes
+    private func roundDown(_ date: Date) -> Date {
+        let seconds: TimeInterval = floor(date.timeIntervalSinceReferenceDate/300.0)*300.0
         return Date(timeIntervalSinceReferenceDate: seconds)
     }
     
