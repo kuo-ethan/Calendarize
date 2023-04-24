@@ -214,19 +214,18 @@ class HabitEditorVC: UIViewController {
     
     // Returns whether this habit is feasible and non-overlapping.
     private func validate(newHabit habit: Habit, among existingHabits: [Habit]) -> Bool {
-        let start = habit.dayInterval.startTime
-        let end = habit.dayInterval.endTime
-        let interval = (end.hour * 60 + end.minutes) - (start.hour * 60 + start.minutes)
         
-        if interval <= 0 {
+        if habit.dayInterval.length <= 0 {
             print("ERROR: End time must be after start time.")
             return false
-        } else if interval < habit.minutes {
+        } else if habit.dayInterval.length < habit.minutes {
             print("ERROR: Habit cannot be completed in the time period.")
             return false
         }
         
         // Check overlap
+        let start = habit.dayInterval.startTime
+        let end = habit.dayInterval.endTime
         for existingHabit in existingHabits {
             if existingHabit.dayOfWeek == habit.dayOfWeek {
                 let existingStart = existingHabit.dayInterval.startTime
@@ -251,6 +250,7 @@ class HabitEditorVC: UIViewController {
         let minutes = Int(durationScrollablePicker.countDownDuration / 60)
         let startTime = fromTimeScrollablePicker.date.formatted(date: .omitted, time: .shortened)
         let endTime = toTimeScrollablePicker.date.formatted(date: .omitted, time: .shortened)
+        print(endTime)
         let timeFrame = DayInterval(startTime: Time(fromString: startTime), endTime: Time(fromString: endTime))
         
         for index in dayTagsDelegate.selectedDayIndices {

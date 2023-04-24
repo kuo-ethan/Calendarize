@@ -9,7 +9,11 @@ import Foundation
 
 typealias TimeTicks = Int
 
-class Task: Codable, Identifiable {
+class Task: Codable, Identifiable, CustomStringConvertible {
+    var description: String {
+        "Task: \(self.name)"
+    }
+    
     
     init(name: String, timeTicks: TimeTicks, deadline: Date) {
         self.name = name

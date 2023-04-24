@@ -44,6 +44,7 @@ class TaskEditorVC: UIViewController {
     let deadlinePicker: UIDatePicker = {
         let dp = UIDatePicker()
         dp.datePickerMode = .dateAndTime
+        dp.minuteInterval = 5
         dp.preferredDatePickerStyle = .inline
         
         dp.translatesAutoresizingMaskIntoConstraints = false

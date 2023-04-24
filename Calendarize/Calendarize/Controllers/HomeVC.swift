@@ -93,7 +93,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let imminentTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "An Imminent Task", type: .ImminentTask)
         let priorityTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Priority Habit", type: .PriorityTask)
         let checkpoint = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Checkpoint", type: .Checkpoint)
-        let testEvents = [habit, imminentTask, priorityTask, checkpoint].map(CKWrapper.init)
+        // let testEvents = [habit, imminentTask, priorityTask, checkpoint].map(CKWrapper.init)
         
         // return calendarKitEvents + testEvents
         
@@ -205,90 +205,95 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     @objc private func didTapRefresh() {
-        let startDate = roundUp(Date())
         let currentUser = Authentication.shared.currentUser!
         
-        currentUser.ckEvents = calendarizeOPT(from: startDate, for: currentUser)
+        currentUser.ckEvents = calendarizeOPT(for: currentUser)
         reloadData()
     }
     
     // MARK: Algorithms below here
-    
-    class MinuteItem: CustomStringConvertible {
-        let title: String
-        let pointer: Any?
+    // Calendarize up to the end of tomorrow. Return CKEvents that can then be added onto calendar.
+    private func calendarizeOPT(for user: User) -> [CKEvent] {
         
-        var description: String {
-            if let pointer {
-                return "\(title) \(String(describing: pointer))"
-            } else {
-                return title
-            }
-        }
-        
-        init(title: String, pointer: Any?) {
-            self.title = title
-            self.pointer = pointer
-        }
-
-    }
-    
-    let AVAILABLE = MinuteItem(title: "available", pointer: nil)
-    let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
-    let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
-    
-    private func calendarizeOPT(from startDate: Date, for user: User) -> [CKEvent] {
+        // Useful values and setup
+        let startDate = roundUp(Date())
         var ckEvents: [CKEvent] = []
         var droppedMessages: [String] = []
-        
         let calendar = Calendar.current
-        var twoDayComponents = DateComponents()
-        twoDayComponents.day = 2
-        let twoDaysAway = calendar.date(byAdding: twoDayComponents, to: startDate)!
-        let endDate = calendar.startOfDay(for: twoDaysAway)
         
-        // Get EK events from now to the end of tomorrow
+        var TWO_DAY_COMPONENTS = DateComponents()
+        TWO_DAY_COMPONENTS.day = 2
+        var ONE_DAY_COMPONENTS = DateComponents()
+        ONE_DAY_COMPONENTS.day = 1
+        var ONE_MIN_COMPONENTS = DateComponents()
+        ONE_MIN_COMPONENTS.minute = 1
+        
+        let endDate = calendar.startOfDay(for: calendar.date(byAdding: TWO_DAY_COMPONENTS, to: startDate)!)
+        
+        // Get any EK events that are from now to the end of tomorrow
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         let events = eventStore.events(matching: predicate)
         
-        // Create big array.
+        // Create big array that represents the calendar
+        
+        // Represents one minute in the calendar representation, and possibly contains a pointer to a Habit or Task.
+        class MinuteItem: CustomStringConvertible {
+            let title: String
+            let pointer: Any?
+            
+            var description: String {
+                if let pointer {
+                    return "\(title) \(String(describing: pointer))"
+                } else {
+                    return title
+                }
+            }
+            
+            init(title: String, pointer: Any?) {
+                self.title = title
+                self.pointer = pointer
+            }
+
+        }
+        
+        let AVAILABLE = MinuteItem(title: "available", pointer: nil)
+        let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
+        let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
+        
         var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
+        
 
         // MARK: Sleep (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
-        var oneDayComponents = DateComponents()
-        oneDayComponents.day = 1
-        var temp = calendar.date(byAdding: oneDayComponents, to: startDate)!
+        var temp = calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!
         temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
         let bedTimeIndex = minutes(from: startDate, to: temp)
         temp = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: temp)!
         let wakeIndex = minutes(from: startDate, to: temp)
-        for i in bedTimeIndex...wakeIndex {
+        for i in bedTimeIndex..<wakeIndex {
             schedule[i] = ASLEEP
         }
         
-        // MARK: Events
+        // MARK: Event
         for event in events {
             let startIndex = max(0, minutes(from: startDate, to: event.startDate))
             let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
-            for i in startIndex...endIndex {
+            for i in startIndex..<endIndex {
                 schedule[i] = UNAVAILABLE
             }
         }
         
         // MARK: Habits
         // Sunday = 0, Monday = 1, ...
-        let todaysDayIndex = calendar.dateComponents([.weekday], from: startDate).weekday! - 1
-        let todaysDay = DayOfWeek(rawValue: todaysDayIndex)
-        let tomorrowsDay = DayOfWeek(rawValue: todaysDayIndex + 1)
+        let todaysDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday! - 1)
+        let tomorrowsDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday!)
         for type in user.habits.keys {
             for habit in user.habits[type]! {
-                // Create a reference date for the start of the habit's respective date
+                // Create a reference date for the start of the habit's  date
                 var referenceDateStart: Date!
                 if habit.dayOfWeek == todaysDay {
                     referenceDateStart = calendar.startOfDay(for: startDate)
                 } else if habit.dayOfWeek == tomorrowsDay {
-                    let temp = calendar.date(byAdding: oneDayComponents, to: startDate)!
-                    referenceDateStart = calendar.startOfDay(for: temp)
+                    referenceDateStart = calendar.startOfDay(for: calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!)
                 } else {
                     continue
                 }
@@ -300,28 +305,18 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 let habitEndDate = calendar.date(byAdding: .minute, value: endTime.hour * 60 + endTime.minutes, to: referenceDateStart)!
                 
                 // Add the habit into the array
-                var startIndex = minutes(from: startDate, to: habitStartDate)
-                var endIndex = minutes(from: startDate, to: habitEndDate)
+                let startIndex = max(0, minutes(from: startDate, to: habitStartDate))
+                let endIndex = minutes(from: startDate, to: habitEndDate)
                 
-                // Only schedule habits whose full time is schedulable
-                if endIndex <= 0 {
-                    // Habit window already ended
-                    continue
-                }
+                // Check that this habit's interval hasn't already passed
+                if 0 >= endIndex { continue }
                 
-                startIndex = max(0, startIndex)
-                endIndex = max(0, endIndex)
-                if endIndex - startIndex < habit.minutes {
-                    // Habit window is too small to fully complete the habit
-                    let dayOfWeek = INDEX_TO_DAY[habit.dayOfWeek.rawValue]
-                    droppedMessages.append("\(habit.type) habit on \(dayOfWeek) was dropped.")
-                    continue
-                }
                 
+                // Now attempt to schedule the habit continuously and as late as possible
                 var i = endIndex - 1
                 var streak = 0
-                var iteration = 0
-                while i >= startIndex {
+                var habitScheduled = false
+                while !habitScheduled && i >= startIndex {
                     if schedule[i] === AVAILABLE {
                         streak += 1
                     } else {
@@ -334,93 +329,111 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                         for j in 0..<streak {
                             schedule[i + j] = habitItem
                         }
-                        break
+                        habitScheduled = true
                     }
                     i -= 1
-                    iteration += 1
+                }
+                if !habitScheduled {
+                    // This habit was not scheudlable
+                    droppedMessages.append("\(habit.type) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
                 }
             }
         }
         
-        // MARK: Priority Tasks
-        // Preprocess the priority tasks to only include those with deadline within the two day window,
-        // and round all deadlines down to the nearest five minutes.
-        var filteredPriorityTasks = user.priorityTasks.filter { task in
-            return task.deadline.compare(endDate) == .orderedAscending
-        }
-        print(filteredPriorityTasks)
-        taskSchedulingWithDurations(for: filteredPriorityTasks, into: &schedule, startingAtDate: startDate)
+        // MARK: Tasks
         
-        print(schedule)
+        // MARK: Given tasks and a schedule array, add the tasks to the schedule such that the maximum number of deadlines are met.
+        func taskSchedulingWithDurations(for tasks: [Task], into schedule: inout [MinuteItem], startingAtDate startDate: Date) {
+            let sortedTasks = tasks.sorted { a, b in
+                return a.deadline.compare(b.deadline) == .orderedAscending // Edge case to consider: tasks with same deadline but different duration
+            }
+            
+            let N = sortedTasks.count
+            if N == 0 {
+                return
+            }
+            let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
+            
+            // Top-down DP.
+            // Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes
+            func subproblem(i: Int, j: Int) -> [Int] {
+                // Base case
+                if i == 0 || j == 0 {
+                    return []
+                }
+                
+                let without_last_task = subproblem(i: i-1, j: j)
+                var with_last_task: [Int] = []
+                var minutesLeft = sortedTasks[i].timeTicks * 30
+                
+                // Compute how many minutes it takes to backload the last task
+                var index = j-1
+                while index >= 0 {
+                    if schedule[index] === AVAILABLE {
+                        minutesLeft -= 1
+                    }
+                    if minutesLeft == 0 {
+                        // Possible to schedule the last task, starting from INDEX.
+                        with_last_task = subproblem(i: i-1, j: index) + [i]
+                        break
+                    }
+                    index -= 1
+                }
+                
+                // Return the choice that has more tasks completed
+                if without_last_task.count > with_last_task.count {
+                    return without_last_task
+                } else if without_last_task.count > with_last_task.count{
+                    return with_last_task
+                } else {
+                    // If either option has the same number of tasks, then take the more urgent one
+                    return without_last_task
+                }
+            }
+            
+            // Now update the schedule
+            let optimalTaskIndices = subproblem(i: N, j: d_N)
+            
+            print("\(optimalTaskIndices.count) out of \(N) tasks were scheduled.")
+            
+            
+            // Add tasks to schedule from the back (latest deadline frist)
+            var i = d_N
+            for taskIndex in optimalTaskIndices.reversed() {
+                let currTask = sortedTasks[taskIndex]
+                var currMinutes = (currTask.timeTicks * 30)
+                let currTaskItem = MinuteItem(title: "task", pointer: currTask)
+                while currMinutes > 0 {
+                    if schedule[i] === AVAILABLE {
+                        schedule[i] = currTaskItem
+                        currMinutes -= 1
+                    }
+                    i -= 1
+                }
+            }
+        }
+        
+        
+        // Filter out inactive priority tasks (deadlines already passed)
+        let activePriorityTasks = user.priorityTasks.filter { task in
+            return startDate.compare(task.deadline) == .orderedSame || startDate.compare(task.deadline) == .orderedAscending
+        }
+        // print(activePriorityTasks)
+        taskSchedulingWithDurations(for: activePriorityTasks, into: &schedule, startingAtDate: startDate)
+        
+        // Print formatted schedule
+        var currDate = startDate
+        for item in schedule {
+            print("\(currDate.formatted()): \(item.description)")
+            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
+        }
+        
         print(droppedMessages)
         return ckEvents
     }
     
-    // MARK: Given tasks with deadline and duration and a schedule, add the tasks to the schedule such that the maximum number of deadlines are met.
-    private func taskSchedulingWithDurations(for tasks: [Task], into schedule: inout [MinuteItem], startingAtDate startDate: Date) {
-        let sortedTasks = tasks.sorted { a, b in
-            return a.deadline.compare(b.deadline) == .orderedAscending
-        }
-        let N = sortedTasks.count
-        if N == 0 {
-            return
-        }
-        let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
-        
-        // Top-down DP.
-        // Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes of the schedule.
-        func subproblem(i: Int, j: Int) -> [Int] {
-            // Base case
-            if i == 0 || j == 0 {
-                return []
-            }
-            
-            let without_last_task = subproblem(i: i-1, j: j)
-            var minutesForLastTask = sortedTasks[i].timeTicks * 30
-            
-            // Compute how many minutes it takes to backload the last task
-            var index = j
-            while index >= 0 {
-                if minutesForLastTask == 0 {
-                    // Index is the starting point for scheduling the next task
-                    let with_last_task = subproblem(i: i-1, j: index) + [i]
-                    // Return the choice that has more tasks completed
-                    if without_last_task.count >= with_last_task.count {
-                        // Note that if =, then we should return the schedule without the last task because it's the least urgent (latest deadline)
-                        return without_last_task
-                    } else {
-                        return with_last_task
-                    }
-                }
-                if schedule[index] === AVAILABLE {
-                    minutesForLastTask -= 1
-                }
-                index -= 1
-            }
-            
-            // Impossible to complete the last task
-            return without_last_task
-        }
-        
-        // Now update the schedule
-        let optimalTaskIndices = subproblem(i: N, j: d_N).reversed()
-        
-        print("\(optimalTaskIndices.count) out of \(N) tasks were scheduled.")
-        
-        var i = d_N
-        for taskIndex in optimalTaskIndices {
-            let currTask = sortedTasks[taskIndex]
-            var currMinutes = (currTask.timeTicks * 30)
-            let currTaskItem = MinuteItem(title: "task", pointer: currTask)
-            while currMinutes > 0 {
-                if schedule[i] === AVAILABLE {
-                    schedule[i] = currTaskItem
-                    currMinutes -= 1
-                }
-                i -= 1
-            }
-        }
-    }
+    
+
     
     // Rounds date object to the next five munutes
     private func roundUp(_ date: Date) -> Date {

@@ -179,13 +179,13 @@ class HabitsVC: UIViewController {
                 let startHour = instance.dayInterval.startTime.hour
                 var sfSymbolName: String!
                 if startHour < 12 {
-                    // Morning is from 12:00 AM to 11:59 AM
+                    // Morning is from 12:01 AM to 11:59 AM
                     sfSymbolName = "sun.and.horizon"
                 } else if startHour < 17 {
                     // Afternoon is from 12:00 PM to 4:59 PM
                     sfSymbolName = "sun.max"
                 } else {
-                    // Evening is from 5:00 PM to 11:59 PM
+                    // Evening is from 5:00 PM to 12:00 AM
                     sfSymbolName = "moon"
                 }
                 let timeInterval = "\(instance.dayInterval.startTime.toString()) - \(instance.dayInterval.endTime.toString())"

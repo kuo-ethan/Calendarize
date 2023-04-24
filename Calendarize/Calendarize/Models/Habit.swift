@@ -18,7 +18,7 @@ enum DayOfWeek: Int, Codable {
 struct Habit: Codable, Identifiable, CustomStringConvertible {
     
     var description: String {
-        return id.uuidString
+        return "Habit: \(self.type)"
     }
     
     let id: UUID
