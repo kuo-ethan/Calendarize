@@ -343,9 +343,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // MARK: Tasks
         
         /*
-         Given tasks and a schedule array, add the tasks to the schedule such that the maximum number of deadlines are met.
+         Given tasks, add the tasks to the schedule such that the maximum number of deadlines are met.
         */
-        func taskSchedulingWithDurations(for tasks: [Task], into schedule: inout [MinuteItem], startingAtDate startDate: Date) {
+        func taskSchedulingWithDurations(for tasks: [Task]) {
             let sortedTasks = tasks.sorted { a, b in
                 return a.deadline.compare(b.deadline) == .orderedAscending // Edge case to consider: tasks with same deadline but different duration
             }
@@ -355,8 +355,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 return
             }
             let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
-            
-            
             
             // Create a cache for memoization
             struct Pair: Hashable {
@@ -431,14 +429,23 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
         }
         
-        
-        // Filter out inactive priority tasks (deadlines already passed)
-        let activePriorityTasks = user.priorityTasks.filter { task in
+        // MARK: (a) Priority Tasks
+        // Filter out outdated priority tasks
+        let priorityTasks = user.priorityTasks.filter { task in
             return startDate.compare(task.deadline) == .orderedAscending
         }
-        taskSchedulingWithDurations(for: activePriorityTasks, into: &schedule, startingAtDate: startDate)
+        taskSchedulingWithDurations(for: priorityTasks)
         
-        // Print formatted schedule
+        // MARK: (b) Current Tasks
+        // Current tasks have deadline between startDate and endDate.
+        let currentTasks = user.regularTasks.filter { task in
+            return startDate.compare(task.deadline) == .orderedAscending && (task.deadline.compare(endDate) == .orderedAscending || task.deadline.compare(endDate) == .orderedSame)
+        }
+        print(currentTasks)
+        taskSchedulingWithDurations(for: currentTasks)
+        
+        
+        // MARK: DEBUGGING: Print formatted schedule
         var currDate = startDate
         for item in schedule {
             print("\(currDate.formatted()): \(item.description)")
