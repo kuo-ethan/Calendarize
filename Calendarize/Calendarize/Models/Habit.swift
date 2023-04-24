@@ -15,20 +15,28 @@ enum DayOfWeek: Int, Codable {
     case Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 
-struct Habit: Codable, Identifiable, CustomStringConvertible {
+class Habit: AddedEvent, Codable, Identifiable, CustomStringConvertible {
     
     var description: String {
-        return "Habit: \(self.type)"
+        return "Habit: \(self.name)"
     }
     
     let id: UUID
     
-    let type: String
+    let name: String
     
     let minutes: Minutes
     
     let dayOfWeek: DayOfWeek
     
     let dayInterval: DayInterval
+    
+    init(id: UUID, type: String, minutes: Minutes, dayOfWeek: DayOfWeek, dayInterval: DayInterval) {
+        self.id = id
+        self.name = type
+        self.minutes = minutes
+        self.dayOfWeek = dayOfWeek
+        self.dayInterval = dayInterval
+    }
     
 }

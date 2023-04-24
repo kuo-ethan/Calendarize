@@ -9,7 +9,7 @@ import Foundation
 
 typealias TimeTicks = Int
 
-class Task: Codable, Identifiable, CustomStringConvertible {
+class Task: AddedEvent, Codable, Identifiable, CustomStringConvertible {
     var description: String {
         "Task: \(self.name)"
     }

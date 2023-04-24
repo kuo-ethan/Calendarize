@@ -13,7 +13,7 @@ import UIKit
 
 // All types of calendar kit events.
 enum CKEventType: String, Codable {
-    case Habit, PriorityTask, ImminentTask, Checkpoint
+    case Habit, PriorityTask, CurrentTask, Checkpoint
 }
 // An event only to be displayed in calendar kit.
 struct CKEvent: Codable {
@@ -53,7 +53,7 @@ final class CKWrapper: EventDescriptor {
             switch (ckEvent.type) {
             case .Habit:
                 return .habitEventColor
-            case.ImminentTask:
+            case.CurrentTask:
                 return .imminentTaskEventColor
             case.PriorityTask:
                 return .priorityTaskEventColor

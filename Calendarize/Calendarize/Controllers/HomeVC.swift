@@ -76,6 +76,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     // This is the `DayViewDataSource` method that the client app has to implement in order to display events with CalendarKit
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
         // The `date` always has it's Time components set to 00:00:00 of the day requested
+        print("called eventsForDate!")
         let startDate = date
         var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
@@ -88,16 +89,15 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         let calendarKitEvents = eventKitEvents.map(EKWrapper.init)
         
-        // MARK: Testing CKEvents
-        let habit = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Habit", type: .Habit)
-        let imminentTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "An Imminent Task", type: .ImminentTask)
-        let priorityTask = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Priority Habit", type: .PriorityTask)
-        let checkpoint = CKEvent(startDate: Date(), endDate: .init(timeInterval: 3600, since: Date()), title: "A Checkpoint", type: .Checkpoint)
-        // let testEvents = [habit, imminentTask, priorityTask, checkpoint].map(CKWrapper.init)
+        if let currentUser = Authentication.shared.currentUser {
+            print("adding new events!")
+            let addedEvents = currentUser.ckEvents.map(CKWrapper.init)
+            return calendarKitEvents + addedEvents
+        } else {
+            return calendarKitEvents
+        }
         
-        // return calendarKitEvents + testEvents
         
-        return calendarKitEvents
     }
     
     // MARK: - DayViewDelegate
@@ -207,19 +207,26 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let currentUser = Authentication.shared.currentUser!
         
         currentUser.ckEvents = calendarizeOPT(for: currentUser)
-        reloadData()
+        Database.shared.updateUser(currentUser) { err in
+            if err != nil {
+                fatalError("Failed to update user after getting new CKEvents")
+            } else {
+                self.reloadData() // Refresh the calendar
+            }
+        }
+        
     }
     
     // MARK: Algorithm
     /*
      Calendarize up to the end of tomorrow. Return CKEvents that can then be added onto calendar.
-    */
+     */
     private func calendarizeOPT(for user: User) -> [CKEvent] {
         
         // Useful constants and setup
         let startDate = roundUp(Date())
         var ckEvents: [CKEvent] = []
-        var droppedMessages: [String] = []
+        var droppedAlerts: [String] = []
         let calendar = Calendar.current
         
         var TWO_DAY_COMPONENTS = DateComponents()
@@ -238,7 +245,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // Represents one minute in the calendar representation, and possibly contains a pointer to a Habit or Task.
         class MinuteItem: CustomStringConvertible {
             let title: String
-            let pointer: Any?
+            let pointer: AddedEvent?
             
             var description: String {
                 if let pointer {
@@ -248,7 +255,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 }
             }
             
-            init(title: String, pointer: Any?) {
+            init(title: String, pointer: AddedEvent?) {
                 self.title = title
                 self.pointer = pointer
             }
@@ -335,7 +342,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 }
                 if !habitScheduled {
                     // This habit was not scheudlable
-                    droppedMessages.append("\(habit.type) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
+                    droppedAlerts.append("\(habit.name) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
                 }
             }
         }
@@ -344,7 +351,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         /*
          Given tasks, add the tasks to the schedule such that the maximum number of deadlines are met.
-        */
+         */
         func taskSchedulingWithDurations(for tasks: [Task]) {
             let sortedTasks = tasks.sorted { a, b in
                 return a.deadline.compare(b.deadline) == .orderedAscending // Edge case to consider: tasks with same deadline but different duration
@@ -366,7 +373,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             /*
              Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes.
              This is top-down dynamic programming.
-            */
+             */
             func subproblem(i: Int, j: Int) -> [Int] {
                 // Base case
                 if i == 0 {
@@ -413,6 +420,13 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             // Now update the schedule
             let optimalTaskIndices = subproblem(i: N, j: d_N)
             
+            // Alert user of which tasks were dropped
+            for i in 0..<N {
+                if !optimalTaskIndices.contains(i) {
+                    droppedAlerts.append("Task \"\(sortedTasks[i].name)\" was dropped.")
+                }
+            }
+            
             // Add tasks to schedule from the back (latest deadline frist)
             var i = d_N-1
             for taskIndex in optimalTaskIndices.reversed() {
@@ -441,9 +455,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let currentTasks = user.regularTasks.filter { task in
             return startDate.compare(task.deadline) == .orderedAscending && (task.deadline.compare(endDate) == .orderedAscending || task.deadline.compare(endDate) == .orderedSame)
         }
-        print(currentTasks)
         taskSchedulingWithDurations(for: currentTasks)
         
+        // TODO: (c) Non-current Tasks
         
         // MARK: DEBUGGING: Print formatted schedule
         var currDate = startDate
@@ -451,8 +465,71 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             print("\(currDate.formatted()): \(item.description)")
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
+        print(droppedAlerts)
         
-        print(droppedMessages)
+        // MARK: Create CKEvents
+        
+        /*
+         Returns corresponding CKEvent for an AddedEvent given its start and end indices within the schedule array.
+         */
+        func createCKEvent(for event: AddedEvent, fromIndex i: Int, toIndex j: Int) -> CKEvent {
+            // Get fromDate and toDate
+            var offsetComponents = DateComponents()
+            offsetComponents.minute = i
+            let fromDate = calendar.date(byAdding: offsetComponents, to: startDate)!
+            offsetComponents.minute = j
+            let toDate = calendar.date(byAdding: offsetComponents, to: startDate)!
+            
+            // Create the CKEvent
+            if let habit = event as? Habit {
+                return CKEvent(startDate: fromDate, endDate: toDate, title: habit.name, type: .Habit)
+            } else {
+                let task = event as! Task
+                var type: CKEventType
+                if task.isPriority {
+                    type = .PriorityTask
+                } else {
+                    type = .CurrentTask
+                }
+                return CKEvent(startDate: fromDate, endDate: toDate, title: task.name, type: type)
+            }
+            
+        }
+
+        var last: AddedEvent?
+        var start: Int?
+        for i in 0..<schedule.count {
+            if last == nil {
+                // Not on a run yet
+                if let curr = schedule[i].pointer {
+                    // Starting a run
+                    last = curr
+                    start = i
+                }
+            } else {
+                // Already on a run
+                if let curr = schedule[i].pointer {
+                    if curr !== last {
+                        // The end of a run, and moving onto a new isntance
+                        ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: i-1))
+                        last = curr
+                        start = i
+                    }
+
+                } else {
+                    // The end of a run
+                    ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: i-1))
+                    last = nil
+                    start = nil
+                }
+
+            }
+        }
+        if last != nil {
+            ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1))
+        }
+        
+        print(ckEvents.count)
         return ckEvents
     }
     
@@ -476,5 +553,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let diffSeconds = Int(endDate.timeIntervalSince1970 - startDate.timeIntervalSince1970)
         return diffSeconds / 60
     }
+    
+    
 }
 
