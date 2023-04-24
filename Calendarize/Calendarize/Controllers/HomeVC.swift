@@ -357,13 +357,13 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             // Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes
             func subproblem(i: Int, j: Int) -> [Int] {
                 // Base case
-                if i == 0 || j == 0 {
+                if i == 0 {
                     return []
                 }
                 
                 let without_last_task = subproblem(i: i-1, j: j)
                 var with_last_task: [Int] = []
-                var minutesLeft = sortedTasks[i].timeTicks * 30
+                var minutesLeft = sortedTasks[i-1].timeTicks * 30
                 
                 // Compute how many minutes it takes to backload the last task
                 var index = j-1
@@ -373,7 +373,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     }
                     if minutesLeft == 0 {
                         // Possible to schedule the last task, starting from INDEX.
-                        with_last_task = subproblem(i: i-1, j: index) + [i]
+                        with_last_task = subproblem(i: i-1, j: index) + [i-1]
                         break
                     }
                     index -= 1
@@ -382,7 +382,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // Return the choice that has more tasks completed
                 if without_last_task.count > with_last_task.count {
                     return without_last_task
-                } else if without_last_task.count > with_last_task.count{
+                } else if without_last_task.count < with_last_task.count{
                     return with_last_task
                 } else {
                     // If either option has the same number of tasks, then take the more urgent one
@@ -393,11 +393,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             // Now update the schedule
             let optimalTaskIndices = subproblem(i: N, j: d_N)
             
-            print("\(optimalTaskIndices.count) out of \(N) tasks were scheduled.")
-            
-            
             // Add tasks to schedule from the back (latest deadline frist)
-            var i = d_N
+            var i = d_N-1
             for taskIndex in optimalTaskIndices.reversed() {
                 let currTask = sortedTasks[taskIndex]
                 var currMinutes = (currTask.timeTicks * 30)
@@ -417,7 +414,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let activePriorityTasks = user.priorityTasks.filter { task in
             return startDate.compare(task.deadline) == .orderedAscending
         }
-        print(activePriorityTasks)
         taskSchedulingWithDurations(for: activePriorityTasks, into: &schedule, startingAtDate: startDate)
         
         // Print formatted schedule
