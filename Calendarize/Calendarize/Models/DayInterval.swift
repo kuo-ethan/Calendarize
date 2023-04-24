@@ -20,7 +20,6 @@ struct DayInterval: Codable {
 }
 
 // A (hours: minutes) time in 24 hour format
-// NOTE: Midnight is 24:00 not 00:00
 struct Time: Codable, Comparable, Equatable {
     static func < (lhs: Time, rhs: Time) -> Bool {
         return (lhs.hour * 60 + lhs.minutes) < (rhs.hour * 60 + rhs.minutes)
@@ -36,12 +35,6 @@ struct Time: Codable, Comparable, Equatable {
     
     init(fromString timeString: String) {
         // timeString is in the form of "10:35 PM"
-        if timeString == "12:00 AM" {
-            print("midnight!")
-            hour = 24
-            minutes = 0
-            return
-        }
         var temp = timeString.components(separatedBy: ":")
         var hr = Int(temp[0])!
         temp = temp[1].components(separatedBy: " ")
@@ -62,9 +55,6 @@ struct Time: Codable, Comparable, Equatable {
     }
     
     func toString() -> String {
-        if hour == 24 && minutes == 0 {
-            return "12:00 AM"
-        }
         var postmark = "AM"
         var h = hour
         if h >= 12 {

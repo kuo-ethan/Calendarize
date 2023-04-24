@@ -311,7 +311,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // Check that this habit's interval hasn't already passed
                 if 0 >= endIndex { continue }
                 
-                
                 // Now attempt to schedule the habit continuously and as late as possible
                 var i = endIndex - 1
                 var streak = 0
@@ -322,7 +321,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     } else {
                         streak = 0
                     }
-                    
+                    //print("\(i) - \(streak)")
                     if streak == habit.minutes {
                         // Found continuous period where habit can be completed
                         let habitItem = MinuteItem(title: "habit", pointer: habit)
@@ -416,9 +415,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // Filter out inactive priority tasks (deadlines already passed)
         let activePriorityTasks = user.priorityTasks.filter { task in
-            return startDate.compare(task.deadline) == .orderedSame || startDate.compare(task.deadline) == .orderedAscending
+            return startDate.compare(task.deadline) == .orderedAscending
         }
-        // print(activePriorityTasks)
+        print(activePriorityTasks)
         taskSchedulingWithDurations(for: activePriorityTasks, into: &schedule, startingAtDate: startDate)
         
         // Print formatted schedule
