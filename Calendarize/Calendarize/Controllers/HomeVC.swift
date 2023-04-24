@@ -192,7 +192,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         endEventEditing()
     }
     
-    // MARK: - EKEventEditViewDelegate
     
     func eventEditViewController(_ controller: EKEventEditViewController, didCompleteWith action: EKEventEditViewAction) {
         endEventEditing()
@@ -211,11 +210,13 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         reloadData()
     }
     
-    // MARK: Algorithms below here
-    // Calendarize up to the end of tomorrow. Return CKEvents that can then be added onto calendar.
+    // MARK: Algorithm
+    /*
+     Calendarize up to the end of tomorrow. Return CKEvents that can then be added onto calendar.
+    */
     private func calendarizeOPT(for user: User) -> [CKEvent] {
         
-        // Useful values and setup
+        // Useful constants and setup
         let startDate = roundUp(Date())
         var ckEvents: [CKEvent] = []
         var droppedMessages: [String] = []
@@ -233,8 +234,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // Get any EK events that are from now to the end of tomorrow
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         let events = eventStore.events(matching: predicate)
-        
-        // Create big array that represents the calendar
         
         // Represents one minute in the calendar representation, and possibly contains a pointer to a Habit or Task.
         class MinuteItem: CustomStringConvertible {
@@ -260,10 +259,12 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
         let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
         
+        // Create one big array that represents calendar
         var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
         
 
-        // MARK: Sleep (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
+        // MARK: Sleep
+        // (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
         var temp = calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!
         temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
         let bedTimeIndex = minutes(from: startDate, to: temp)
@@ -341,7 +342,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Tasks
         
-        // MARK: Given tasks and a schedule array, add the tasks to the schedule such that the maximum number of deadlines are met.
+        /*
+         Given tasks and a schedule array, add the tasks to the schedule such that the maximum number of deadlines are met.
+        */
         func taskSchedulingWithDurations(for tasks: [Task], into schedule: inout [MinuteItem], startingAtDate startDate: Date) {
             let sortedTasks = tasks.sorted { a, b in
                 return a.deadline.compare(b.deadline) == .orderedAscending // Edge case to consider: tasks with same deadline but different duration
@@ -353,15 +356,30 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
             let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
             
-            // Top-down DP.
-            // Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes
+            
+            
+            // Create a cache for memoization
+            struct Pair: Hashable {
+                let i: Int
+                let j: Int
+            }
+            var cache: Dictionary<Pair, [Int]> = [:]
+            
+            /*
+             Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes.
+             This is top-down dynamic programming.
+            */
             func subproblem(i: Int, j: Int) -> [Int] {
                 // Base case
                 if i == 0 {
                     return []
                 }
                 
-                let without_last_task = subproblem(i: i-1, j: j)
+                if cache[Pair(i: i-1, j: j)] == nil {
+                    cache[Pair(i: i-1, j: j)] = subproblem(i: i-1, j: j)
+                }
+                let without_last_task = cache[Pair(i: i-1, j: j)]!
+
                 var with_last_task: [Int] = []
                 var minutesLeft = sortedTasks[i-1].timeTicks * 30
                 
@@ -373,7 +391,10 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     }
                     if minutesLeft == 0 {
                         // Possible to schedule the last task, starting from INDEX.
-                        with_last_task = subproblem(i: i-1, j: index) + [i-1]
+                        if cache[Pair(i: i-1, j: index)] == nil {
+                            cache[Pair(i: i-1, j: index)] = subproblem(i: i-1, j: index)
+                        }
+                        with_last_task = cache[Pair(i: i-1, j: index)]! + [i-1]
                         break
                     }
                     index -= 1
@@ -381,13 +402,14 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 
                 // Return the choice that has more tasks completed
                 if without_last_task.count > with_last_task.count {
-                    return without_last_task
+                    cache[Pair(i: i, j: j)] = without_last_task
                 } else if without_last_task.count < with_last_task.count{
-                    return with_last_task
+                    cache[Pair(i: i, j: j)] = with_last_task
                 } else {
                     // If either option has the same number of tasks, then take the more urgent one
-                    return without_last_task
+                    cache[Pair(i: i, j: j)] = without_last_task
                 }
+                return cache[Pair(i: i, j: j)]!
             }
             
             // Now update the schedule
