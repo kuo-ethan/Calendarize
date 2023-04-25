@@ -9,6 +9,7 @@ import UIKit
 import CalendarKit
 import EventKit
 import EventKitUI
+import NotificationBannerSwift
 
 final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
@@ -17,6 +18,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     private var calendarizeCalendar: EKCalendar?
     
     static var shared: HomeVC!
+    
+    private var bannerQueue = NotificationBannerQueue(maxBannersOnScreenSimultaneously: 3)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -215,7 +218,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
      */
     @objc private func didTapRefresh() {
         let currentUser = Authentication.shared.currentUser!
-        calendarizeOPT(for: currentUser)
+        calendarize(for: currentUser)
         reloadData()
     }
     
@@ -236,7 +239,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     /*
      Calendarize up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar.
      */
-    private func calendarizeOPT(for user: User) {
+    private func calendarize(for user: User) {
         // Delete existing calendarize calendar, if exists
         setCalendarizeCalendar()
         if calendarizeCalendar != nil {
@@ -256,7 +259,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // Useful constants and setup
         let startDate = roundUp(Date())
-        var droppedAlerts: [String] = []
+        var dropped: [AddedEvent] = []
         let calendar = Calendar.current
         
         var TWO_DAY_COMPONENTS = DateComponents()
@@ -393,7 +396,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 }
                 if !habitScheduled {
                     // This habit was not scheudlable
-                    droppedAlerts.append("\(habit.name) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
+                    dropped.append(habit)
+//                    droppedAlerts.append("\(habit.name) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
                 }
             }
         }
@@ -419,28 +423,31 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 let i: Int
                 let j: Int
             }
-            var cache: Dictionary<Pair, [Int]> = [:]
+            var cache: Dictionary<Pair, [(Int, Int)]> = [:]
             
             /*
-             Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes.
+             Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes, along with the starting index they are to be scheduled at.
              This is top-down dynamic programming.
              */
-            func subproblem(i: Int, j: Int) -> [Int] {
+            func subproblem(i: Int, j: Int) -> [(Int, Int)] {
                 // Base case
                 if i == 0 {
                     return []
                 }
                 
+                // Without the last task
                 if cache[Pair(i: i-1, j: j)] == nil {
                     cache[Pair(i: i-1, j: j)] = subproblem(i: i-1, j: j)
                 }
                 let without_last_task = cache[Pair(i: i-1, j: j)]!
 
-                var with_last_task: [Int] = []
+                // With the last task
+                let last_task = sortedTasks[i-1]
+                var with_last_task: [(Int, Int)] = []
                 var minutesLeft = sortedTasks[i-1].timeTicks * 30
                 
                 // Compute how many minutes it takes to backload the last task
-                var index = j-1
+                var index = min(j, minutes(from: startDate, to: last_task.deadline)) - 1
                 while index >= 0 {
                     if schedule[index] === AVAILABLE {
                         minutesLeft -= 1
@@ -450,7 +457,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                         if cache[Pair(i: i-1, j: index)] == nil {
                             cache[Pair(i: i-1, j: index)] = subproblem(i: i-1, j: index)
                         }
-                        with_last_task = cache[Pair(i: i-1, j: index)]! + [i-1]
+                        with_last_task = cache[Pair(i: i-1, j: index)]! + [(i-1, index)]
                         break
                     }
                     index -= 1
@@ -469,18 +476,25 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
             
             // Now update the schedule
-            let optimalTaskIndices = subproblem(i: N, j: d_N)
+            let optimalTaskInfo = subproblem(i: N, j: d_N)
+            print("Result of calendarize algortihm: \(optimalTaskInfo)")
+            
+            var optimalTaskIndices: [Int] = []
+            for i in 0..<optimalTaskInfo.count {
+                optimalTaskIndices.append(optimalTaskInfo[i].0)
+            }
             
             // Alert user of which tasks were dropped
             for i in 0..<N {
                 if !optimalTaskIndices.contains(i) {
-                    droppedAlerts.append("Task \"\(sortedTasks[i].name)\" was dropped.")
+                    dropped.append(sortedTasks[i])
+                    //droppedAlerts.append("Task \"\(sortedTasks[i].name)\" was dropped.")
                 }
             }
             
-            // Add tasks to schedule from the back (latest deadline frist)
-            var i = d_N-1
-            for taskIndex in optimalTaskIndices.reversed() {
+            // Add tasks to schedule
+            for (taskIndex, scheduleIndex) in optimalTaskInfo {
+                var i = scheduleIndex
                 let currTask = sortedTasks[taskIndex]
                 var currMinutes = (currTask.timeTicks * 30)
                 let currTaskItem = MinuteItem(title: "task", pointer: currTask)
@@ -489,9 +503,23 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                         schedule[i] = currTaskItem
                         currMinutes -= 1
                     }
-                    i -= 1
+                    i += 1
                 }
             }
+            
+//            var i = d_N-1
+//            for taskIndex in optimalTaskIndices.reversed() {
+//                let currTask = sortedTasks[taskIndex]
+//                var currMinutes = (currTask.timeTicks * 30)
+//                let currTaskItem = MinuteItem(title: "task", pointer: currTask)
+//                while currMinutes > 0 {
+//                    if schedule[i] === AVAILABLE {
+//                        schedule[i] = currTaskItem
+//                        currMinutes -= 1
+//                    }
+//                    i -= 1
+//                }
+//            }
         }
         
         // MARK: (a) Priority Tasks
@@ -516,7 +544,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             print("\(currDate.formatted()): \(item.description)")
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
-        print(droppedAlerts)
+    
         
         // MARK: Create EKEvents and add to 'Calendarize' calendar.
         
@@ -583,6 +611,17 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         if last != nil {
             addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1)
         }
+        
+        // MARK: Dropped habits/tasks alerts
+        for droppedEvent in dropped {
+            if let habit = droppedEvent as? Habit {
+                let message = "Impossible to schedule \(habit.name) within \(habit.dayInterval.startTime.toString())-\(habit.dayInterval.endTime.toString())"
+                showErrorBanner(withTitle: "Habit dropped", subtitle: message)
+            } else if let task = droppedEvent as? Task {
+                let message = "Impossible to complete \(task.name) by its deadline"
+                showErrorBanner(withTitle: "Task dropped", subtitle: message)
+            }
+        }
     }
     
     
@@ -607,5 +646,25 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     
+    // Copied from SignInVC
+    private func showErrorBanner(withTitle title: String, subtitle: String? = nil) {
+        showBanner(withStyle: .warning, title: title, subtitle: subtitle)
+    }
+    
+    private func showBanner(withStyle style: BannerStyle, title: String, subtitle: String?) {
+        // guard bannerQueue.numberOfBanners == 0 else { return }
+        let banner = FloatingNotificationBanner(title: title, subtitle: subtitle,
+                                                titleFont: .systemFont(ofSize: 17, weight: .medium),
+                                                subtitleFont: .systemFont(ofSize: 14, weight: .regular),
+                                                style: style)
+        banner.backgroundColor = .primary
+        banner.show(bannerPosition: .top,
+                    queue: bannerQueue,
+                    edgeInsets: UIEdgeInsets(top: 15, left: 15, bottom: 0, right: 15),
+                    cornerRadius: 10,
+                    shadowColor: .primaryText,
+                    shadowOpacity: 0.3,
+                    shadowBlurRadius: 10)
+    }
 }
 

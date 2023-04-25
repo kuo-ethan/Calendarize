@@ -162,7 +162,7 @@ class SignInVC: UIViewController {
             }
             
             guard error == nil else {
-                self.showErrorBanner(withTitle: "Failed to sign in", subtitle: "Please try again")
+                self.showErrorBanner(withTitle: "Invalid email or password", subtitle: "Please try again")
                 return
             }
             

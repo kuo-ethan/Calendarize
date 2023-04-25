@@ -151,7 +151,12 @@ class SignUpVC: UIViewController {
         }
         
         guard let confirmPassword = confirmPasswordTextField.text, confirmPassword != "" else {
-            showErrorBanner(withTitle: "Missing password confirmation", subtitle: "Please confirm your password")
+            showErrorBanner(withTitle: "Missing password confirmation", subtitle: "Please re-enter your password")
+            return
+        }
+        
+        if password != confirmPassword {
+            showErrorBanner(withTitle: "Password does not match", subtitle: "Please re-enter your password")
             return
         }
         
@@ -165,7 +170,7 @@ class SignUpVC: UIViewController {
             }
             
             guard error == nil else {
-                self.showErrorBanner(withTitle: "Failed to create account", subtitle: "Please try again")
+                self.showErrorBanner(withTitle: error!.localizedDescription, subtitle: "Please try again")
                 return
             }
             
