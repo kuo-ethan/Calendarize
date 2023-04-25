@@ -329,16 +329,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             schedule[i] = ASLEEP
         }
         
-//        var temp = calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!
-//        temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
-//
-//        let bedTimeIndex = minutes(from: startDate, to: temp)
-//        temp = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: temp)!
-//        let wakeIndex = minutes(from: startDate, to: temp)
-//        for i in bedTimeIndex..<wakeIndex {
-//            schedule[i] = ASLEEP
-//        }
-        
         // MARK: Event
         for event in events {
             if event.calendar == calendarizeCalendar {
