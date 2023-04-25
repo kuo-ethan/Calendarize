@@ -21,10 +21,10 @@ class User: Codable {
         self.priorityTasks = []
         self.regularTasks = []
         self.savedHabitTags = ["Gym", "Read", "Prayer", "Run", "Stretch", "Relax", "Family"]
-        self.ckEvents = []
         self.awakeInterval  = DayInterval(startTime: Time(fromString: "8:00 AM"), endTime: Time(fromString: "10:00 PM"))
         self.productivityStyle = .Dynamic
-        self.breakRange = [2, 6]
+        self.breakMin = 2
+        self.breakMax = 6
     }
     
     @DocumentID var uid: UserID?
@@ -42,14 +42,13 @@ class User: Codable {
     
     var savedHabitTags: [String]
     
-    // MARK: CalendarKit events for the next two full days
-    var ckEvents: [CKEvent]
-    
     var awakeInterval: DayInterval
     
     var productivityStyle: ProductivityStyle
     
-    var breakRange: [Int]
+    var breakMin: Int
+    
+    var breakMax: Int
     
     // MARK: Defaults to nil, update when calendar generated
     var busynessIndex: Int?

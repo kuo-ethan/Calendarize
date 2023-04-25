@@ -68,6 +68,8 @@ class TaskEditorVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        hideKeyboardWhenTappedAround()
+        
         title = "Edit Task"
         
         view.backgroundColor = .background
