@@ -79,7 +79,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     // This is the `DayViewDataSource` method that the client app has to implement in order to display events with CalendarKit
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
         // The `date` always has it's Time components set to 00:00:00 of the day requested
-        print("DEBUG: Called eventsForDate(.)")
         let startDate = date
         var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
@@ -228,7 +227,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         calendarizeCalendar = nil
         for calendar in eventStore.calendars(for: .event) {
             if calendar.title == "Calendarize" {
-                print("DEBUG: There exists a calendar called Calendarize")
                 calendarizeCalendar = calendar
             }
         }
@@ -243,7 +241,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         setCalendarizeCalendar()
         if calendarizeCalendar != nil {
             try! eventStore.removeCalendar(calendarizeCalendar!, commit: true)
-            print("DEBUG: Deleted Calendarize calendar.")
         }
         calendarizeCalendar = nil
         
@@ -305,15 +302,42 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
 
         // MARK: Sleep
-        // (Default sleep interval is 12AM to 8AM. Later, use Apple sleep data)
-        var temp = calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!
-        temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
-        let bedTimeIndex = minutes(from: startDate, to: temp)
-        temp = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: temp)!
-        let wakeIndex = minutes(from: startDate, to: temp)
-        for i in bedTimeIndex..<wakeIndex {
+        let bedTime = user.awakeInterval.endTime
+        let wakeUpTime = user.awakeInterval.startTime
+        
+        // Create dates for wake up time and bed time
+        // NOTE: assumes bed time falls within today, and wake up time falls within tomorrow.
+        let bedTimeDate = calendar.date(bySettingHour: bedTime.hour, minute: bedTime.minutes, second: 0, of: startDate)!
+        print("DEBUG: \(bedTimeDate.description)")
+        let wakeUpDate = calendar.date(bySettingHour: wakeUpTime.hour, minute: wakeUpTime.minutes, second: 0, of: calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!)!
+        print("DEBUG: \(wakeUpDate.description)")
+        
+        // Sleep from tonight to tomorrow morning
+        let bedTimeIndex = minutes(from: startDate, to: bedTimeDate)
+        let wakeUpIndex = minutes(from: startDate, to: wakeUpDate)
+        for i in bedTimeIndex..<wakeUpIndex {
             schedule[i] = ASLEEP
         }
+        
+        // Sleep from earlier today
+        for i in 0..<max(0, (wakeUpIndex - (24 * 60))) {
+            schedule[i] = ASLEEP
+        }
+        
+        // Sleep from later tomorrow
+        for i in (bedTimeIndex + (24 * 60))..<schedule.count {
+            schedule[i] = ASLEEP
+        }
+        
+//        var temp = calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!
+//        temp = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: temp)!
+//
+//        let bedTimeIndex = minutes(from: startDate, to: temp)
+//        temp = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: temp)!
+//        let wakeIndex = minutes(from: startDate, to: temp)
+//        for i in bedTimeIndex..<wakeIndex {
+//            schedule[i] = ASLEEP
+//        }
         
         // MARK: Event
         for event in events {
@@ -510,7 +534,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
          Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array.
          */
         func addCalendarizeEvent(for eventItem: AddedEvent, fromIndex i: Int, toIndex j: Int) {
-            print("DEBUG: Called addCalendarizeEvent(.)")
             // Get fromDate and toDate
             var offsetComponents = DateComponents()
             offsetComponents.minute = i
