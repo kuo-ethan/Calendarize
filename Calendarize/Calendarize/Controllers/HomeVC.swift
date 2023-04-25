@@ -14,6 +14,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private var eventStore = EKEventStore()
     
+    private var calendarizeCalendar: EKCalendar?
+    
     static var shared: HomeVC!
     
     override func viewDidLoad() {
@@ -65,6 +67,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private func initializeStore() {
         eventStore = EKEventStore()
+        setCalendarizeCalendar()
     }
     
     @objc private func storeChanged(_ notification: Notification) {
@@ -76,26 +79,31 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     // This is the `DayViewDataSource` method that the client app has to implement in order to display events with CalendarKit
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
         // The `date` always has it's Time components set to 00:00:00 of the day requested
-        print("called eventsForDate!")
+        print("DEBUG: Called eventsForDate(.)")
         let startDate = date
         var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
         // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
         let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
         
+        // Get events from ALL calendars (including "Calendarize" if it exists!)
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         
         let eventKitEvents = eventStore.events(matching: predicate)
         
         let calendarKitEvents = eventKitEvents.map(EKWrapper.init)
         
-        if let currentUser = Authentication.shared.currentUser {
-            print("adding new events!")
-            let addedEvents = currentUser.ckEvents.map(CKWrapper.init)
-            return calendarKitEvents + addedEvents
-        } else {
-            return calendarKitEvents
-        }
+//        if let currentUser = Authentication.shared.currentUser {
+//            print("adding new events!")
+//            let addedEvents = currentUser.ckEvents.map(CKWrapper.init)
+//            return calendarKitEvents + addedEvents
+//        } else {
+//            return calendarKitEvents
+//        }
+        
+        return calendarKitEvents
+        
+        
         
         
     }
@@ -203,29 +211,54 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         navigationController?.pushViewController(ProfileVC(), animated: true)
     }
     
+    /*
+     User wants to generate a new schedule.
+     */
     @objc private func didTapRefresh() {
         let currentUser = Authentication.shared.currentUser!
-        
-        currentUser.ckEvents = calendarizeOPT(for: currentUser)
-        Database.shared.updateUser(currentUser) { err in
-            if err != nil {
-                fatalError("Failed to update user after getting new CKEvents")
-            } else {
-                self.reloadData() // Refresh the calendar
+        calendarizeOPT(for: currentUser)
+        reloadData()
+    }
+    
+    /*
+     Sets the 'Calendarize' calendar, if it exists.
+     NOTE: we are assuming there's only one calendar with the name 'Calendarize'
+     */
+    private func setCalendarizeCalendar() {
+        calendarizeCalendar = nil
+        for calendar in eventStore.calendars(for: .event) {
+            if calendar.title == "Calendarize" {
+                print("DEBUG: There exists a calendar called Calendarize")
+                calendarizeCalendar = calendar
             }
         }
-        
     }
     
     // MARK: Algorithm
     /*
-     Calendarize up to the end of tomorrow. Return CKEvents that can then be added onto calendar.
+     Calendarize up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar.
      */
-    private func calendarizeOPT(for user: User) -> [CKEvent] {
+    private func calendarizeOPT(for user: User) {
+        // Delete existing calendarize calendar, if exists
+        setCalendarizeCalendar()
+        if calendarizeCalendar != nil {
+            try! eventStore.removeCalendar(calendarizeCalendar!, commit: true)
+            print("DEBUG: Deleted Calendarize calendar.")
+        }
+        calendarizeCalendar = nil
+        
+        // Make a new empty calendar
+        let freshCalendar = EKCalendar(for: .event, eventStore: eventStore)
+        freshCalendar.title = "Calendarize"
+        freshCalendar.cgColor = UIColor.primary.cgColor
+        freshCalendar.source = eventStore.defaultCalendarForNewEvents!.source
+        
+        // Add it to the event store and save a pointer to it.
+        try! eventStore.saveCalendar(freshCalendar, commit: true)
+        calendarizeCalendar = freshCalendar
         
         // Useful constants and setup
         let startDate = roundUp(Date())
-        var ckEvents: [CKEvent] = []
         var droppedAlerts: [String] = []
         let calendar = Calendar.current
         
@@ -239,6 +272,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let endDate = calendar.startOfDay(for: calendar.date(byAdding: TWO_DAY_COMPONENTS, to: startDate)!)
         
         // Get any EK events that are from now to the end of tomorrow
+        // Note: we must manually ignore events from Calendarize calendar
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         let events = eventStore.events(matching: predicate)
         
@@ -283,6 +317,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Event
         for event in events {
+            if event.calendar == calendarizeCalendar {
+                continue
+            }
             let startIndex = max(0, minutes(from: startDate, to: event.startDate))
             let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
             for i in startIndex..<endIndex {
@@ -467,33 +504,38 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         print(droppedAlerts)
         
-        // MARK: Create CKEvents
+        // MARK: Create EKEvents and add to 'Calendarize' calendar.
         
         /*
-         Returns corresponding CKEvent for an AddedEvent given its start and end indices within the schedule array.
+         Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array.
          */
-        func createCKEvent(for event: AddedEvent, fromIndex i: Int, toIndex j: Int) -> CKEvent {
+        func addCalendarizeEvent(for eventItem: AddedEvent, fromIndex i: Int, toIndex j: Int) {
+            print("DEBUG: Called addCalendarizeEvent(.)")
             // Get fromDate and toDate
             var offsetComponents = DateComponents()
             offsetComponents.minute = i
             let fromDate = calendar.date(byAdding: offsetComponents, to: startDate)!
             offsetComponents.minute = j
             let toDate = calendar.date(byAdding: offsetComponents, to: startDate)!
-            
-            // Create the CKEvent
-            if let habit = event as? Habit {
-                return CKEvent(startDate: fromDate, endDate: toDate, title: habit.name, type: .Habit)
+
+            // Create the EKEvent
+            let newEKEvent = EKEvent(eventStore: eventStore)
+            newEKEvent.calendar = calendarizeCalendar
+            if let habit = eventItem as? Habit {
+                newEKEvent.title = habit.name
+                newEKEvent.startDate = fromDate
+                newEKEvent.endDate = toDate
             } else {
-                let task = event as! Task
-                var type: CKEventType
-                if task.isPriority {
-                    type = .PriorityTask
-                } else {
-                    type = .CurrentTask
-                }
-                return CKEvent(startDate: fromDate, endDate: toDate, title: task.name, type: type)
+                let task = eventItem as! Task
+                newEKEvent.title = task.name
+                newEKEvent.startDate = fromDate
+                newEKEvent.endDate = toDate
             }
-            
+            do {
+                try eventStore.save(newEKEvent, span: .thisEvent)
+            } catch let error as NSError {
+                print("failed to save event with error : \(error)")
+            }
         }
 
         var last: AddedEvent?
@@ -510,15 +552,15 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // Already on a run
                 if let curr = schedule[i].pointer {
                     if curr !== last {
-                        // The end of a run, and moving onto a new isntance
-                        ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: i-1))
+                        // The end of a run, and moving onto a new instance
+                        addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1)
                         last = curr
                         start = i
                     }
 
                 } else {
                     // The end of a run
-                    ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: i-1))
+                    addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1)
                     last = nil
                     start = nil
                 }
@@ -526,11 +568,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
         }
         if last != nil {
-            ckEvents.append(createCKEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1))
+            addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1)
         }
-        
-        print(ckEvents.count)
-        return ckEvents
     }
     
     
