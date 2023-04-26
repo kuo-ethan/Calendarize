@@ -10,4 +10,4 @@ import Foundation
 /*
  The only purpose of this class is so that Habit and Task can be related.
  */
-class AddedEvent { }
+class Event { }
