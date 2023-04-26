@@ -622,6 +622,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 showErrorBanner(withTitle: "Task dropped", subtitle: message)
             }
         }
+        if dropped.count == 0 {
+            showErrorBanner(withTitle: "Success!", subtitle: "No habits or tasks were dropped")
+        }
     }
     
     
