@@ -7,40 +7,40 @@
 
 import Foundation
 import UIKit
-import SelectionList
+// import SelectionList
 
 class PreferencesVC: UIViewController {
     
-    let productivityStyleLabel: TitleLabel = {
-        let label = TitleLabel(withText: "Productivity Style:", ofSize: DEFAULT_FONT_SIZE)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        return label
-    }()
-    
-    let productivityStyleList: SelectionList = {
-        let selectionList = SelectionList()
-        selectionList.items = ["Dynamic", "Frontload", "Balanced", "Backload"]
-        selectionList.allowsMultipleSelection = false
-        selectionList.isSelectionMarkTrailing = false
-        selectionList.selectionImage = UIImage(systemName: "circle.fill")
-        selectionList.deselectionImage = UIImage(systemName: "circle")
-        selectionList.translatesAutoresizingMaskIntoConstraints = false
-        
-        let currentProductivityStyle = Authentication.shared.currentUser!.productivityStyle
-        switch (currentProductivityStyle) {
-            case .Dynamic:
-                selectionList.selectedIndex = 0
-            case .Frontload:
-                selectionList.selectedIndex = 1
-            case .Balanced:
-                selectionList.selectedIndex = 2
-            case .Backload:
-                selectionList.selectedIndex = 3
-        }
-        
-        return selectionList
-    }()
+//    let productivityStyleLabel: TitleLabel = {
+//        let label = TitleLabel(withText: "Productivity Style:", ofSize: DEFAULT_FONT_SIZE)
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//
+//        return label
+//    }()
+//
+//    let productivityStyleList: SelectionList = {
+//        let selectionList = SelectionList()
+//        selectionList.items = ["Dynamic", "Frontload", "Balanced", "Backload"]
+//        selectionList.allowsMultipleSelection = false
+//        selectionList.isSelectionMarkTrailing = false
+//        selectionList.selectionImage = UIImage(systemName: "circle.fill")
+//        selectionList.deselectionImage = UIImage(systemName: "circle")
+//        selectionList.translatesAutoresizingMaskIntoConstraints = false
+//
+//        let currentProductivityStyle = Authentication.shared.currentUser!.productivityStyle
+//        switch (currentProductivityStyle) {
+//            case .Dynamic:
+//                selectionList.selectedIndex = 0
+//            case .Frontload:
+//                selectionList.selectedIndex = 1
+//            case .Balanced:
+//                selectionList.selectedIndex = 2
+//            case .Backload:
+//                selectionList.selectedIndex = 3
+//        }
+//
+//        return selectionList
+//    }()
     
     let wakeUpTimeLabel: UILabel = {
         let label = TitleLabel(withText: "Wake time:", ofSize: DEFAULT_FONT_SIZE)
@@ -80,12 +80,12 @@ class PreferencesVC: UIViewController {
         return dp
     }()
     
-    let breakTimeLabel: UILabel = {
-        let label = TitleLabel(withText: "Break range:", ofSize: DEFAULT_FONT_SIZE)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
-        return label
-    }()
+//    let breakTimeLabel: UILabel = {
+//        let label = TitleLabel(withText: "Break range:", ofSize: DEFAULT_FONT_SIZE)
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//
+//        return label
+//    }()
     
     // TODO: Make custom view for break range selector
     
@@ -95,7 +95,7 @@ class PreferencesVC: UIViewController {
         title = "Preferences"
         view.backgroundColor = .white
         
-        productivityStyleList.addTarget(self, action: #selector(selectionChanged), for: .valueChanged)
+        // productivityStyleList.addTarget(self, action: #selector(selectionChanged), for: .valueChanged)
         wakeUpTimeSelector.addTarget(self, action: #selector(wakeUpTimeChanged), for: .valueChanged)
         bedTimeSelector.addTarget(self, action: #selector(bedTimeChanged), for: .valueChanged)
         
@@ -114,48 +114,48 @@ class PreferencesVC: UIViewController {
         bedTimeStack.translatesAutoresizingMaskIntoConstraints = false
         
         
-        view.addSubview(productivityStyleLabel)
-        view.addSubview(productivityStyleList)
+//        view.addSubview(productivityStyleLabel)
+//        view.addSubview(productivityStyleList)
         view.addSubview(wakeUpStack)
         view.addSubview(bedTimeStack)
-        view.addSubview(breakTimeLabel)
+//        view.addSubview(breakTimeLabel)
         
         NSLayoutConstraint.activate([
-            productivityStyleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
-            productivityStyleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            productivityStyleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+//            productivityStyleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+//            productivityStyleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+//            productivityStyleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+//
+//            productivityStyleList.topAnchor.constraint(equalTo: productivityStyleLabel.bottomAnchor, constant: 5),
+//            productivityStyleList.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+//            productivityStyleList.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            productivityStyleList.topAnchor.constraint(equalTo: productivityStyleLabel.bottomAnchor, constant: 5),
-            productivityStyleList.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            productivityStyleList.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            wakeUpStack.topAnchor.constraint(equalTo: productivityStyleList.bottomAnchor, constant: 40),
+            wakeUpStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25),
             wakeUpStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             wakeUpStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
             bedTimeStack.topAnchor.constraint(equalTo: wakeUpStack.bottomAnchor, constant: 10),
             bedTimeStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             bedTimeStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            breakTimeLabel.topAnchor.constraint(equalTo: bedTimeStack.bottomAnchor, constant: 20),
-            breakTimeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            breakTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+//            breakTimeLabel.topAnchor.constraint(equalTo: bedTimeStack.bottomAnchor, constant: 20),
+//            breakTimeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+//            breakTimeLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
         ])
     }
     
-    @objc private func selectionChanged() {
-        let index = productivityStyleList.selectedIndex
-        let currentUser = Authentication.shared.currentUser!
-        if index == 0 {
-            currentUser.productivityStyle = .Dynamic
-        } else if index == 1 {
-            currentUser.productivityStyle = .Frontload
-        } else if index == 2 {
-            currentUser.productivityStyle = .Balanced
-        } else if index == 3 {
-            currentUser.productivityStyle = .Backload
-        }
-        Database.shared.updateUser(currentUser, nil)
-    }
+//    @objc private func selectionChanged() {
+//        let index = productivityStyleList.selectedIndex
+//        let currentUser = Authentication.shared.currentUser!
+//        if index == 0 {
+//            currentUser.productivityStyle = .Dynamic
+//        } else if index == 1 {
+//            currentUser.productivityStyle = .Frontload
+//        } else if index == 2 {
+//            currentUser.productivityStyle = .Balanced
+//        } else if index == 3 {
+//            currentUser.productivityStyle = .Backload
+//        }
+//        Database.shared.updateUser(currentUser, nil)
+//    }
     
     @objc private func wakeUpTimeChanged() {
         let currentUser = Authentication.shared.currentUser!
