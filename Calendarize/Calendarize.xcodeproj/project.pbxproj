@@ -10,7 +10,7 @@
 		CB02DFEF2950EEA50008AB44 /* PreferencesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */; };
 		CB02E011295100E70008AB44 /* StatisticsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB02E010295100E70008AB44 /* StatisticsVC.swift */; };
 		CB02E0142951037E0008AB44 /* SelectionList in Frameworks */ = {isa = PBXBuildFile; productRef = CB02E0132951037E0008AB44 /* SelectionList */; };
-		CB3418EC29F650690048FBBA /* AddedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3418EB29F650690048FBBA /* AddedEvent.swift */; };
+		CB3418EC29F650690048FBBA /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3418EB29F650690048FBBA /* Event.swift */; };
 		CB496679294E91F500934805 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB496678294E91F500934805 /* GoogleService-Info.plist */; };
 		CB66D5D22952D85700617B47 /* CircularProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB66D5D12952D85700617B47 /* CircularProgressBarView.swift */; };
 		CBAB2CD3294A9218001876DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB2CD2294A9218001876DD /* AppDelegate.swift */; };
@@ -58,7 +58,7 @@
 /* Begin PBXFileReference section */
 		CB02DFEE2950EEA50008AB44 /* PreferencesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesVC.swift; sourceTree = "<group>"; };
 		CB02E010295100E70008AB44 /* StatisticsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsVC.swift; sourceTree = "<group>"; };
-		CB3418EB29F650690048FBBA /* AddedEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddedEvent.swift; sourceTree = "<group>"; };
+		CB3418EB29F650690048FBBA /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		CB496678294E91F500934805 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CB66D5D12952D85700617B47 /* CircularProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBarView.swift; sourceTree = "<group>"; };
 		CBAB2CCF294A9218001876DD /* Calendarize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Calendarize.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -162,7 +162,7 @@
 				CBAB2D08294AEB51001876DD /* User.swift */,
 				CBAB2D16294AEF0B001876DD /* Authentication.swift */,
 				CBAB2D06294AEAA6001876DD /* Utility.swift */,
-				CB3418EB29F650690048FBBA /* AddedEvent.swift */,
+				CB3418EB29F650690048FBBA /* Event.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -337,7 +337,7 @@
 				CBAB2CFF294AE5F2001876DD /* UIViewController+HideKeyboard.swift in Sources */,
 				CB66D5D22952D85700617B47 /* CircularProgressBarView.swift in Sources */,
 				CBAB2D0B294AEBE8001876DD /* Task.swift in Sources */,
-				CB3418EC29F650690048FBBA /* AddedEvent.swift in Sources */,
+				CB3418EC29F650690048FBBA /* Event.swift in Sources */,
 				CBAB2D2E294BB5D9001876DD /* TasksVC.swift in Sources */,
 				CBAB2D09294AEB51001876DD /* User.swift in Sources */,
 				CBAB2D1D294BB134001876DD /* SignInVC.swift in Sources */,
