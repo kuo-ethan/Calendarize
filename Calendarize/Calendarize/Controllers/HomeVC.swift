@@ -95,19 +95,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         let calendarKitEvents = eventKitEvents.map(EKWrapper.init)
         
-//        if let currentUser = Authentication.shared.currentUser {
-//            print("adding new events!")
-//            let addedEvents = currentUser.ckEvents.map(CKWrapper.init)
-//            return calendarKitEvents + addedEvents
-//        } else {
-//            return calendarKitEvents
-//        }
-        
         return calendarKitEvents
-        
-        
-        
-        
+    
     }
     
     // MARK: - DayViewDelegate
@@ -261,6 +250,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let startDate = roundUp(Date())
         var dropped: [AddedEvent] = []
         let calendar = Calendar.current
+        var initialIndices: [Int] = []
+        let todaysDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday! - 1)
+        let tomorrowsDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday!)
         
         var TWO_DAY_COMPONENTS = DateComponents()
         TWO_DAY_COMPONENTS.day = 2
@@ -303,7 +295,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // Create one big array that represents calendar
         var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
         
-
         // MARK: Sleep
         let bedTime = user.awakeInterval.endTime
         let wakeUpTime = user.awakeInterval.startTime
@@ -311,9 +302,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // Create dates for wake up time and bed time
         // NOTE: assumes bed time falls within today, and wake up time falls within tomorrow.
         let bedTimeDate = calendar.date(bySettingHour: bedTime.hour, minute: bedTime.minutes, second: 0, of: startDate)!
-        print("DEBUG: \(bedTimeDate.description)")
         let wakeUpDate = calendar.date(bySettingHour: wakeUpTime.hour, minute: wakeUpTime.minutes, second: 0, of: calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!)!
-        print("DEBUG: \(wakeUpDate.description)")
         
         // Sleep from tonight to tomorrow morning
         let bedTimeIndex = minutes(from: startDate, to: bedTimeDate)
@@ -346,8 +335,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Habits
         // Sunday = 0, Monday = 1, ...
-        let todaysDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday! - 1)
-        let tomorrowsDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday!)
         for type in user.habits.keys {
             for habit in user.habits[type]! {
                 // Create a reference date for the start of the habit's  date
@@ -383,7 +370,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     } else {
                         streak = 0
                     }
-                    //print("\(i) - \(streak)")
                     if streak == habit.minutes {
                         // Found continuous period where habit can be completed
                         let habitItem = MinuteItem(title: "habit", pointer: habit)
@@ -391,13 +377,13 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                             schedule[i + j] = habitItem
                         }
                         habitScheduled = true
+                        initialIndices.append((i))
                     }
                     i -= 1
                 }
                 if !habitScheduled {
                     // This habit was not scheudlable
                     dropped.append(habit)
-//                    droppedAlerts.append("\(habit.name) habit on \(INDEX_TO_DAY[habit.dayOfWeek.rawValue]) was dropped.")
                 }
             }
         }
@@ -423,6 +409,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 let i: Int
                 let j: Int
             }
+            
             var cache: Dictionary<Pair, [(Int, Int)]> = [:]
             
             /*
@@ -440,7 +427,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     cache[Pair(i: i-1, j: j)] = subproblem(i: i-1, j: j)
                 }
                 let without_last_task = cache[Pair(i: i-1, j: j)]!
-
+                
                 // With the last task
                 let last_task = sortedTasks[i-1]
                 var with_last_task: [(Int, Int)] = []
@@ -448,6 +435,10 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 
                 // Compute how many minutes it takes to backload the last task
                 var index = min(j, minutes(from: startDate, to: last_task.deadline)) - 1
+                // Fast foward to first AVAILABLE index
+                while schedule[index] !== AVAILABLE {
+                    index -= 1
+                }
                 while index >= 0 {
                     if schedule[index] === AVAILABLE {
                         minutesLeft -= 1
@@ -477,7 +468,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             
             // Now update the schedule
             let optimalTaskInfo = subproblem(i: N, j: d_N)
-            print("Result of calendarize algortihm: \(optimalTaskInfo)")
             
             var optimalTaskIndices: [Int] = []
             for i in 0..<optimalTaskInfo.count {
@@ -488,12 +478,12 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             for i in 0..<N {
                 if !optimalTaskIndices.contains(i) {
                     dropped.append(sortedTasks[i])
-                    //droppedAlerts.append("Task \"\(sortedTasks[i].name)\" was dropped.")
                 }
             }
             
             // Add tasks to schedule
             for (taskIndex, scheduleIndex) in optimalTaskInfo {
+                initialIndices.append(scheduleIndex)
                 var i = scheduleIndex
                 let currTask = sortedTasks[taskIndex]
                 var currMinutes = (currTask.timeTicks * 30)
@@ -506,20 +496,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     i += 1
                 }
             }
-            
-//            var i = d_N-1
-//            for taskIndex in optimalTaskIndices.reversed() {
-//                let currTask = sortedTasks[taskIndex]
-//                var currMinutes = (currTask.timeTicks * 30)
-//                let currTaskItem = MinuteItem(title: "task", pointer: currTask)
-//                while currMinutes > 0 {
-//                    if schedule[i] === AVAILABLE {
-//                        schedule[i] = currTaskItem
-//                        currMinutes -= 1
-//                    }
-//                    i -= 1
-//                }
-//            }
         }
         
         // MARK: (a) Priority Tasks
@@ -538,16 +514,124 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // TODO: (c) Non-current Tasks
         
-        // MARK: DEBUGGING: Print formatted schedule
+        // DEBUG: Print formatted schedule
         var currDate = startDate
         for item in schedule {
             print("\(currDate.formatted()): \(item.description)")
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
     
+        // MARK: Randomization
+        // Given a schedule array, 'randomize' it by moving added events early and probabilistically one by one.
+            
+        let sortedInitialIndices = initialIndices.sorted()
+            
+        /*
+         Randomly move the event starting at INDEX to somewhere before. The new index will be uniformly chosen at random from all indices with minimum fragmentation. Only indicies that are a multiple of 5 minutes will be considered as possible indices.
+         */
+        func randomEarlyShift(forEventAtIndex index: Int) {
+            /*
+             Counts the number of fragments created when scheduling some minutes starting at index. Assumes that schedule[i] === AVAILABLE and that the minutes are schedulable.
+             */
+            func countFragments(at index: Int, forMinutes minutes: Int) -> Int {
+                var fragments = 1
+                var i = index+1
+                var m = minutes-1
+                
+                while m > 0 {
+                    if schedule[i] === AVAILABLE {
+                        if schedule[i-1] !== AVAILABLE {
+                            // Found start of new fragment
+                            fragments += 1
+                        }
+                        m -= 1
+                    }
+                    i += 1
+                }
+                
+                return fragments
+            }
+            
+            // Set up
+            var validIndices: [Int] = [index] // OPT index as an option might be the only option
+            var duration: Int // How many minutes need to be scheduled from that index
+            
+            // Get the corresponding Habit/Task object
+            let item = schedule[index]
+            var habit: Habit!
+            var task: Task! // Only one will be set!
+
+            if ((schedule[index].pointer as? Habit) != nil) {
+                habit = schedule[index].pointer as? Habit
+                duration = habit.minutes
+            } else {
+                task = schedule[index].pointer as? Task
+                duration = task.timeTicks * 30
+            }
+            
+            // Clear the current event from schedule
+            var i = index
+            var m = duration
+            while m > 0 {
+                if schedule[i] === item {
+                    schedule[i] = AVAILABLE
+                    m -= 1
+                }
+                i += 1
+            }
+            
+            // Get all valid indices
+            if habit != nil {
+                let earliestTime = habit.dayInterval.startTime
+                let earliestDate = roundUp(calendar.date(bySettingHour: earliestTime.hour, minute: earliestTime.minutes, second: 0, of: startDate)!)
+                var earliestIndex = minutes(from: startDate, to: earliestDate)
+                // If the habit is for tomorrow, then add one day to index
+                if habit.dayOfWeek == tomorrowsDay {
+                    earliestIndex += (24 * 60)
+                }
+                
+                // Now consider all possible starting indices (that have minute multiple of 5)
+                var i = earliestIndex
+                while i < index {
+                    if countFragments(at: i, forMinutes: habit.minutes) == 1 {
+                        validIndices.append(i)
+                    }
+                    i += 5
+                }
+            } else {
+                // Randomizing a task
+                var minFragments = countFragments(at: index, forMinutes: duration)
+                var i = 0
+                while i < index {
+                    let currFragments = countFragments(at: i, forMinutes: duration)
+                    if currFragments < minFragments {
+                        // Found a new, less fragmented optimal
+                        minFragments = currFragments
+                        validIndices = [i]
+                    } else if currFragments == minFragments {
+                        validIndices.append(i)
+                    }
+                    i += 5
+                }
+            }
+            
+            // Randomly pick an index and schedule from there
+            i = validIndices.randomElement()!
+            m = duration
+            while m > 0 {
+                if schedule[i] === AVAILABLE {
+                    schedule[i] = item
+                    m -= 1
+                }
+                i += 1
+            }
+        }
+            
+        for index in sortedInitialIndices {
+            randomEarlyShift(forEventAtIndex: index)
+        }
         
         // MARK: Create EKEvents and add to 'Calendarize' calendar.
-        
         /*
          Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array.
          */
@@ -605,7 +689,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     last = nil
                     start = nil
                 }
-
             }
         }
         if last != nil {
@@ -615,7 +698,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // MARK: Dropped habits/tasks alerts
         for droppedEvent in dropped {
             if let habit = droppedEvent as? Habit {
-                let message = "Impossible to schedule \(habit.name) within \(habit.dayInterval.startTime.toString())-\(habit.dayInterval.endTime.toString())"
+                let message = "Impossible to schedule \(habit.name) from \(habit.dayInterval.startTime.toString()) to \(habit.dayInterval.endTime.toString())"
                 showErrorBanner(withTitle: "Habit dropped", subtitle: message)
             } else if let task = droppedEvent as? Task {
                 let message = "Impossible to complete \(task.name) by its deadline"
@@ -626,6 +709,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             showErrorBanner(withTitle: "Success!", subtitle: "No habits or tasks were dropped")
         }
     }
+        
     
     
 
