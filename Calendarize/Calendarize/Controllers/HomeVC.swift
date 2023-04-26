@@ -436,7 +436,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // Compute how many minutes it takes to backload the last task
                 var index = min(j, minutes(from: startDate, to: last_task.deadline)) - 1
                 // Fast foward to first AVAILABLE index
-                while schedule[index] !== AVAILABLE {
+                while index > 0 && schedule[index] !== AVAILABLE {
                     index -= 1
                 }
                 while index >= 0 {
@@ -591,25 +591,29 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 }
                 
                 // Now consider all possible starting indices (that have minute multiple of 5)
-                var i = earliestIndex
+                var i = max(0, earliestIndex)
                 while i < index {
-                    if countFragments(at: i, forMinutes: habit.minutes) == 1 {
+                    print("schedule[\(i)] -> \(countFragments(at: i, forMinutes: habit.minutes))")
+                    if schedule[i] === AVAILABLE && countFragments(at: i, forMinutes: habit.minutes) == 1 {
                         validIndices.append(i)
                     }
                     i += 5
                 }
+                print("Valid indices for \(habit.name): \(validIndices)")
             } else {
                 // Randomizing a task
                 var minFragments = countFragments(at: index, forMinutes: duration)
                 var i = 0
                 while i < index {
-                    let currFragments = countFragments(at: i, forMinutes: duration)
-                    if currFragments < minFragments {
-                        // Found a new, less fragmented optimal
-                        minFragments = currFragments
-                        validIndices = [i]
-                    } else if currFragments == minFragments {
-                        validIndices.append(i)
+                    if schedule[i] === AVAILABLE {
+                        let currFragments = countFragments(at: i, forMinutes: duration)
+                        if currFragments < minFragments {
+                            // Found a new, less fragmented optimal
+                            minFragments = currFragments
+                            validIndices = [i]
+                        } else if currFragments == minFragments {
+                            validIndices.append(i)
+                        }
                     }
                     i += 5
                 }
