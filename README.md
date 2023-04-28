@@ -13,7 +13,7 @@ Calendarize, a mobile application for iOS devices, is a "smart" to-do list that 
 - `Non-intrusive events`: All Calendarized events will be added to an app-specific "calendar," which can be toggled off in your Apple Calendar if you don't want to view them.
 - `Dynamic scheduling`: Generate new schedules at any time. Schedules are randomized (but still optimal), so if you don't like the schedule you get, you can always request a new one.
 
-This app is built programmatically using UIKit and a Firebase backend. The local calendar view uses [CalendarKit](https://github.com/richardtop/CalendarKit), an API developed by Richard Topchii.
+This app is built programmatically using UIKit and a Firebase backend. The local calendar view uses [CalendarKit](https://github.com/richardtop/CalendarKit), a Swift API developed by Richard Topchii.
 
 # Release/Usage
 The app will be published on the Apple app store within the next few months after some minor improvements and new features. For now, check out my Demo video below!
