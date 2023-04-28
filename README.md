@@ -5,13 +5,13 @@ Modern day to-do list apps are great, except for when your to-do list grows long
 Calendarize, a mobile application for iOS devices, is a "smart" to-do list that not only serves as a repository for your tasks, but also suggests personalized and realistic schedules to maximize task completion. Here's how it works:
 
 - `Apple Calendar integration`: Sync your Apple calendar to generate schedules around your personal calendar. This means that events will be automatically added to your Apple calendar!
-- `Local calendar`: View a mirror image of your Apple calendar locally, so you don't have to switch over to your Apple Calendar
+- `Local calendar`: View a mirror image of your Apple calendar locally, so you don't have to switch over to your Apple Calendar.
 - `Task list`: Add, remove, and edit tasks in seconds in the simple and intuitive tasks page.
-- `Priority tasks`: Distinguish important tasks so they will not be dropped by the scheduler
+- `Priority tasks`: Distinguish important tasks so they will not be dropped by the scheduler.
 - `Healthy habits`: Tell us your daily healthy habit goals (i.e. gym, prayer, etc.), and we'll automatically incorporate them into your schedule. This includes your sleep schedule.
-- `Optimal task scheduling`: Generates schedules that maximize the number of tasks completed while also respecting your daily healthy habits goals
-- `Non-intrusive events`: All Calendarized events will be added to an app-specific "calendar," which can be toggled off in your Apple Calendar if you don't want to view them
-- `Dynamic scheduling`: Generate new schedules at any time. Schedules are randomized (but still optimal), so if you don't like the schedule you get, you can always request a new one
+- `Optimal task scheduling`: Generates schedules that maximize the number of tasks completed while also respecting your daily healthy habits goals.
+- `Non-intrusive events`: All Calendarized events will be added to an app-specific "calendar," which can be toggled off in your Apple Calendar if you don't want to view them.
+- `Dynamic scheduling`: Generate new schedules at any time. Schedules are randomized (but still optimal), so if you don't like the schedule you get, you can always request a new one.
 
 This app is built programmatically using UIKit and uses a Firebase backend. The local calendar view uses CalendarKit, an API developed by Richard Topchii (https://www.youtube.com/watch?v=iC4XxmExqFA&t=920s)
 
