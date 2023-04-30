@@ -400,7 +400,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     i -= 1
                 }
                 if !habitScheduled {
-                    // This habit was not scheudlable
+                    // This habit was not schedulable
                     dropped.append(habit)
                 }
             }
@@ -409,11 +409,11 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // MARK: Tasks
         
         /*
-         Given tasks, add the tasks to the schedule such that the maximum number of deadlines are met. Note that does not actually modify schedule, but adds to the initialIndicesToEvent dictionary for later usage.
+         Given tasks, add the tasks to the (copy) schedule such that the maximum number of deadlines are met. Adds to the initialIndicesToEvent dictionary for later usage.
          */
         func taskSchedulingWithDurations(for tasks: [Task]) {
             let sortedTasks = tasks.sorted { a, b in
-                return a.deadline.compare(b.deadline) == .orderedAscending // Edge case to consider: tasks with same deadline but different duration
+                return a.deadline.compare(b.deadline) == .orderedAscending
             }
             
             let N = sortedTasks.count
@@ -524,7 +524,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         taskSchedulingWithDurations(for: priorityTasks)
         
         // MARK: (b) Current Tasks
-        // Current tasks have deadline between startDate and endDate.
+        // Current tasks have deadline between startDate and endDate (which includes midnight)
         let currentTasks = user.regularTasks.filter { task in
             return startDate.compare(task.deadline) == .orderedAscending && (task.deadline.compare(endDate) == .orderedAscending || task.deadline.compare(endDate) == .orderedSame)
         }
@@ -532,27 +532,15 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // TODO: (c) Non-current Tasks
         
-        // DEBUG: Print formatted schedule
-        var currDate = startDate
-        for item in schedule {
-            print("\(currDate.formatted()): \(item.description)")
-            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
-        }
-        
         // DEBUG: Print formatted schedule copy
-        currDate = startDate
+        var currDate = startDate
         for item in scheduleMutable {
             print("\(currDate.formatted()): \(item.description)")
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
-    
-        // DEBUG: Print stored events
-        for (index, event) in initialIndexToEvent {
-            print("\(index): \(event)")
-        }
         
         // MARK: Randomization
-        // Given a schedule array, 'randomize' it by moving added events early and probabilistically one by one.
+        // Given a schedule array, 'randomize' it by moving added events early and probabilistically, one by one.
             
         let sortedInitialIndices = initialIndexToEvent.keys.sorted()
             
@@ -603,7 +591,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 var i = max(0, earliestIndex)
                 while i < index {
                     if schedule[i] === AVAILABLE && countFragments(at: i, forMinutes: habit.minutes) == 1 {
-                        print("DEBUG: schedule[\(i)] -> \(countFragments(at: i, forMinutes: habit.minutes))")
                         validIndices.append(i)
                     }
                     i += 5
