@@ -213,39 +213,52 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         reloadData()
     }
     
-    /*
-     Sets the 'Calendarize' calendar, if it exists.
-     NOTE: we are assuming there's only one calendar with the name 'Calendarize'
-     */
-//    private func setCalendarizeCalendar() {
-//        calendarizeCalendar = nil
-//        for calendar in eventStore.calendars(for: .event) {
-//            if calendar.title == "Calendarize" {
-//                calendarizeCalendar = calendar
-//            }
-//        }
-//    }
-    
     // MARK: Algorithm
     /*
      Calendarize up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar.
      */
     private func calendarize(for user: User) {
-        // Delete any calendars with the name 'Calendarize'
-        for calendar in eventStore.calendars(for: .event) {
-            if calendar.title == "Calendarize" {
-                try! eventStore.removeCalendar(calendar, commit: true)
+//        // Delete any calendars with the name 'Calendarize'
+//        for calendar in eventStore.calendars(for: .event) {
+//            if calendar.title == "Calendarize" {
+//                try! eventStore.removeCalendar(calendar, commit: true)
+//            }
+//        }
+//
+//        // Make a new empty calendar
+//        let freshCalendar = EKCalendar(for: .event, eventStore: eventStore)
+//        freshCalendar.title = "Calendarize"
+//        freshCalendar.cgColor = UIColor.primary.cgColor
+//        freshCalendar.source = eventStore.defaultCalendarForNewEvents!.source
+//
+//        // Add it to the event store
+//        try! eventStore.saveCalendar(freshCalendar, commit: true)
+        
+        // Assume there's only one (or zero) calendars called 'Calendarize'
+        var ekCalendar: EKCalendar!
+        for cal in eventStore.calendars(for: .event) {
+            if cal.title == "Calendarize" {
+                ekCalendar = cal
+                break
             }
         }
         
-        // Make a new empty calendar
-        let freshCalendar = EKCalendar(for: .event, eventStore: eventStore)
-        freshCalendar.title = "Calendarize"
-        freshCalendar.cgColor = UIColor.primary.cgColor
-        freshCalendar.source = eventStore.defaultCalendarForNewEvents!.source
+        if ekCalendar == nil {
+             // Make a new empty calendar
+            ekCalendar = EKCalendar(for: .event, eventStore: eventStore)
+            ekCalendar.title = "Calendarize"
+            ekCalendar.cgColor = UIColor.primary.cgColor
+            ekCalendar.source = eventStore.defaultCalendarForNewEvents!.source
+            try! eventStore.saveCalendar(ekCalendar, commit: true)
+        } else {
+            // Clear calendar
+            let predicate = eventStore.predicateForEvents(withStart: calendar.date(byAdding: .year, value: -2, to: Date())!, end: calendar.date(byAdding: .year, value: 2, to: Date())!, calendars: [ekCalendar])
+            for ev in eventStore.events(matching: predicate) {
+                print("deleting an event")
+                try! eventStore.remove(ev, span: .thisEvent)
+            }
+        }
         
-        // Add it to the event store
-        try! eventStore.saveCalendar(freshCalendar, commit: true)
         
         // Useful constants and setup
         let startDate = roundUp(Date())
@@ -324,9 +337,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Apple Calendar Events
         for event in events {
-            if event.calendar == freshCalendar { // Might not be needed
-                continue
-            }
+//            if event.calendar == ekCalendar { // Might not be needed
+//                continue
+//            }
             let startIndex = max(0, minutes(from: startDate, to: event.startDate))
             let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
             for i in startIndex..<endIndex {
@@ -650,7 +663,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
 
             // Create the EKEvent
             let newEKEvent = EKEvent(eventStore: eventStore)
-            newEKEvent.calendar = freshCalendar
+            newEKEvent.calendar = ekCalendar
             if let habit = eventItem as? Habit {
                 newEKEvent.title = habit.name
                 newEKEvent.startDate = fromDate
