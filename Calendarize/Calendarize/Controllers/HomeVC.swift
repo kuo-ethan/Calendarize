@@ -254,7 +254,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             // Clear calendar
             let predicate = eventStore.predicateForEvents(withStart: calendar.date(byAdding: .year, value: -2, to: Date())!, end: calendar.date(byAdding: .year, value: 2, to: Date())!, calendars: [ekCalendar])
             for ev in eventStore.events(matching: predicate) {
-                print("deleting an event")
                 try! eventStore.remove(ev, span: .thisEvent)
             }
         }
