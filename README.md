@@ -9,9 +9,9 @@ Calendarize, a mobile application for iOS devices, is a "smart" to-do list that 
 - `Task list`: Add, remove, and edit tasks in seconds.
 - `Priority tasks`: Distinguish important tasks from non-important tasks, which will be prioritized by the scheduler.
 - `Healthy habits`: Tell us your daily healthy habit goals (i.e. gym, prayer, etc.), and we'll automatically incorporate them into your schedule. This includes your sleep schedule.
-- `Optimal task scheduling`: Generates schedules that maximize the number of tasks completed while also respecting your daily healthy habits goals.
+- `Optimal task scheduling`: Generates schedules that maximize the number of tasks completable while also respecting your daily healthy habits goals.
 - `Non-intrusive events`: All Calendarized events will be added to an app-specific "calendar," which can be toggled off in your Apple Calendar if you don't want to view them.
-- `Dynamic scheduling`: Generate new schedules at any time. Schedules are randomized (but still optimal), so if you don't like the schedule you get, you can always request a new one.
+- `Dynamic scheduling`: Generate new schedules at any time. Schedules are randomized (but still optimal), so if you don't like the schedule you get, you can always prompt a new one.
 
 This app is built programmatically using UIKit and a Firebase backend. The local calendar view uses [CalendarKit](https://github.com/richardtop/CalendarKit), a Swift API developed by Richard Topchii.
 
