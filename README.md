@@ -6,7 +6,7 @@ Calendarize, a mobile application for iOS devices, is a "smart" to-do list that 
 
 - `Apple Calendar integration`: Sync your Apple calendar to generate schedules around your personal calendar. This means that events will be automatically added to your Apple calendar!
 - `Local calendar`: View a mirror image of your Apple calendar locally, so you don't have to switch over to your Apple Calendar.
-- `Task list`: Add, remove, and edit tasks in seconds in the simple and intuitive tasks page.
+- `Task list`: Add, remove, and edit tasks in seconds.
 - `Priority tasks`: Distinguish important tasks so they will not be dropped by the scheduler.
 - `Healthy habits`: Tell us your daily healthy habit goals (i.e. gym, prayer, etc.), and we'll automatically incorporate them into your schedule. This includes your sleep schedule.
 - `Optimal task scheduling`: Generates schedules that maximize the number of tasks completed while also respecting your daily healthy habits goals.
