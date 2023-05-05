@@ -15,8 +15,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private var eventStore = EKEventStore()
     
-    // private var calendarizeCalendar: EKCalendar?
-    
     static var shared: HomeVC!
     
     private var bannerQueue = NotificationBannerQueue(maxBannersOnScreenSimultaneously: 3)
@@ -40,9 +38,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         var calendarStyle = CalendarStyle()
         calendarStyle.timeline.eventGap = 2.0
         updateStyle(calendarStyle)
-        
-        // Set calendarize calendar
-        // setCalendarizeCalendar()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -87,10 +82,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let startDate = date
         var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
-        // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
         let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
         
-        // Get events from ALL calendars (including "Calendarize" if it exists!)
+        // Get events from ALL calendars (including "Calendarize" if it exists)
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
         
         let eventKitEvents = eventStore.events(matching: predicate)
@@ -168,7 +162,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             } else {
                 // If editing event is different from the original,
                 // then it's pointing to the event already in the `eventStore`
-                // Let's save changes to oriignal event to the `eventStore`
+                // Let's save changes to original event to the `eventStore`
                 try! eventStore.save(editingEvent.ekEvent,
                                      span: .thisEvent)
             }
@@ -204,35 +198,16 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         navigationController?.pushViewController(ProfileVC(), animated: true)
     }
     
-    /*
-     User wants to generate a new schedule.
-     */
+    /* User wants to generate a new schedule */
     @objc private func didTapRefresh() {
         let currentUser = Authentication.shared.currentUser!
         calendarize(for: currentUser)
         reloadData()
     }
     
-    // MARK: Algorithm
-    /*
-     Calendarize up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar.
-     */
+    // MARK: Calendarize algorithm
+    /* Generate schedule up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar. */
     private func calendarize(for user: User) {
-//        // Delete any calendars with the name 'Calendarize'
-//        for calendar in eventStore.calendars(for: .event) {
-//            if calendar.title == "Calendarize" {
-//                try! eventStore.removeCalendar(calendar, commit: true)
-//            }
-//        }
-//
-//        // Make a new empty calendar
-//        let freshCalendar = EKCalendar(for: .event, eventStore: eventStore)
-//        freshCalendar.title = "Calendarize"
-//        freshCalendar.cgColor = UIColor.primary.cgColor
-//        freshCalendar.source = eventStore.defaultCalendarForNewEvents!.source
-//
-//        // Add it to the event store
-//        try! eventStore.saveCalendar(freshCalendar, commit: true)
         
         // Assume there's only one (or zero) calendars called 'Calendarize'
         var ekCalendar: EKCalendar!
@@ -320,7 +295,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         // Sleep from tonight to tomorrow morning
         let bedTimeIndex = minutes(from: startDate, to: bedTimeDate)
         let wakeUpIndex = minutes(from: startDate, to: wakeUpDate)
-        for i in bedTimeIndex..<wakeUpIndex {
+        for i in max(0, bedTimeIndex)..<wakeUpIndex {
             schedule[i] = ASLEEP
         }
         
@@ -408,9 +383,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Tasks
         
-        /*
-         Given tasks, add the tasks to the (copy) schedule such that the maximum number of deadlines are met. Adds to the initialIndicesToEvent dictionary for later usage.
-         */
+        /* Given tasks, add the tasks to the (copy) schedule such that the maximum number of deadlines are met. Adds to the initialIndicesToEvent dictionary for later usage. */
         func taskSchedulingWithDurations(for tasks: [Task]) {
             let sortedTasks = tasks.sorted { a, b in
                 return a.deadline.compare(b.deadline) == .orderedAscending
@@ -430,10 +403,8 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             
             var cache: Dictionary<Pair, [(Int, Int)]> = [:]
             
-            /*
-             Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes, along with the starting index they are to be scheduled at.
-             This is top-down dynamic programming.
-             */
+            /* Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes, along with the starting index they are to be scheduled at.
+             This is top-down dynamic programming. */
             func subproblem(i: Int, j: Int) -> [(Int, Int)] {
                 // Base case
                 if i == 0 {
@@ -523,34 +494,29 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         taskSchedulingWithDurations(for: priorityTasks)
         
-        // MARK: (b) Current Tasks
+        // MARK: (b) Regular Tasks
+        // TODO: Calendarize more distant tasks too, and only display up to the end of tomorrow
         // Current tasks have deadline between startDate and endDate (which includes midnight)
         let currentTasks = user.regularTasks.filter { task in
             return startDate.compare(task.deadline) == .orderedAscending && (task.deadline.compare(endDate) == .orderedAscending || task.deadline.compare(endDate) == .orderedSame)
         }
         taskSchedulingWithDurations(for: currentTasks)
         
-        // TODO: (c) Non-current Tasks
-        
-        // DEBUG: Print formatted schedule copy
-        var currDate = startDate
-        for item in scheduleMutable {
-            print("\(currDate.formatted()): \(item.description)")
-            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
-        }
+//        // DEBUG: Print formatted schedule copy
+//        var currDate = startDate
+//        for item in scheduleMutable {
+//            print("\(currDate.formatted()): \(item.description)")
+//            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
+//        }
         
         // MARK: Randomization
         // Given a schedule array, 'randomize' it by moving added events early and probabilistically, one by one.
             
         let sortedInitialIndices = initialIndexToEvent.keys.sorted()
             
-        /*
-         Randomly schedule the event somewhere before or at INDEX. The new index will be uniformly chosen at random from all indices with minimum fragmentation. Only indicies that are a multiple of 5 minutes will be considered as possible indices.
-         */
+        /* Randomly schedule the event somewhere before or at INDEX. The new index will be uniformly chosen at random from all indices with minimum fragmentation. Only indicies that are a multiple of 5 minutes will be considered as possible indices. */
         func randomlySchedule(event: Event, before index: Int) {
-            /*
-             Counts the number of fragments created when scheduling some minutes starting at index. Assumes that schedule[i] === AVAILABLE and that the minutes are schedulable.
-             */
+            /* Counts the number of fragments created when scheduling some minutes starting at index. Assumes that schedule[i] === AVAILABLE and that the minutes are schedulable. */
             func countFragments(at index: Int, forMinutes minutes: Int) -> Int {
                 var fragments = 1
                 var i = index+1

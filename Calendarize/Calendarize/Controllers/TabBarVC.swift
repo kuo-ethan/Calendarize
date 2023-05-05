@@ -61,12 +61,12 @@ class TabBarVC: UITabBarController {
     }
     
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        // TODO: update user task list with every change, rather than when they revisit Home page
         if item == tabBar.items?[0] {
             Database.shared.updateUser(Authentication.shared.currentUser!, nil)
         } else if item == tabBar.items?[1] {
             TasksVC.shared.tableView.reloadData()
             wrappedHomeVC.popToRootViewController(animated: false)
-            print("reloaded table view data")
         }
     }
 }

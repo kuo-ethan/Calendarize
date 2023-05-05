@@ -27,14 +27,14 @@ class Authentication {
     /* Given a UID, adds a listener to the user's document and updates currentUser */
     func linkUser(withuid uid: String, completion: (() -> Void)?) {
         
-        // calls that closure when that document is updated
+        // Whenever a user's document is updated in backend, we decode the user document and set it to currentUser. This is a valid feature because if a user has multiple devices and makes an update on one device, it should be immediately reflected in the other.
+        // Note: The user document is decoded and set to currentUser upon app lauch automatically.
         userListener = Database.shared.db.collection("users").document(uid).addSnapshotListener { [weak self] docSnapshot, error in
-            print("snapshot listener triggered")
             guard let document = docSnapshot else {
-                fatalError("ERROR: document with UID \(uid) not found")
+                fatalError("ERROR: Document with UID \(uid) not found")
             }
             guard let user = try? document.data(as: User.self) else {
-                fatalError("ERROR: user from firestore not decodable")
+                fatalError("ERROR: User from Firestore not decodable")
             }
             self?.currentUser = user
             if let completion = completion {
@@ -46,7 +46,7 @@ class Authentication {
     /* Create a new document for a new user, then link the user as above */
     func linkNewUser(withuid uid: String, withData user: User, completion: (() -> Void)?) {
         Database.shared.addUser(uid, user) { error in
-            if let _ = error {
+            if error != nil {
                 fatalError("ERROR: failed to add a new user to Firestore")
             } else {
                 self.linkUser(withuid: uid, completion: completion)
