@@ -37,7 +37,7 @@ class Authentication {
                 fatalError("ERROR: user from firestore not decodable")
             }
             self?.currentUser = user
-            if let completion = completion {
+            if let completion = completion { // MARK: ayo? i think this should be outside...
                 completion()
             }
         }

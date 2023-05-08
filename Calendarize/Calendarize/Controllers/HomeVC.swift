@@ -637,7 +637,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         
         // MARK: Create EKEvents and add to 'Calendarize' calendar.
         /*
-         Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array.
+         Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array, inclusive.
          */
         func addCalendarizeEvent(for eventItem: Event, fromIndex i: Int, toIndex j: Int) {
             // Get fromDate and toDate
