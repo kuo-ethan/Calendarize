@@ -719,6 +719,9 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
         
+        
+        
+        
         // MARK: Dropped habits/tasks alerts
         for droppedEvent in dropped {
             if let habit = droppedEvent as? Habit {
@@ -732,6 +735,23 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         if dropped.count == 0 {
             showErrorBanner(withTitle: "Success!", subtitle: "No habits or tasks were dropped")
         }
+        
+        // MARK: Workload index
+        // This is the percent of your day that is free time!
+        var freeCount = 0
+        var awakeCount = 0
+        for item in schedule {
+            if item !== ASLEEP {
+                awakeCount += 1
+            }
+            if item === AVAILABLE {
+                freeCount += 1
+            }
+        }
+        let temp = Double(freeCount) / Double(awakeCount)
+        let workloadIndex = (temp * 100).rounded() / 100
+        
+        
     }
         
     

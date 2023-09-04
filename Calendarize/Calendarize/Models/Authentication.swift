@@ -62,4 +62,11 @@ class Authentication {
     func isSignedIn() -> Bool {
         return auth.currentUser != nil
     }
+    
+    func signOut() {
+        do {
+            Authentication.shared.unlinkCurrentUser()
+            try FirebaseAuth.Auth.auth().signOut()
+        } catch { return }
+    }
 }

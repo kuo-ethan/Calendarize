@@ -22,17 +22,25 @@ class CircularProgressBarView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        createCircularPath()
+        //createCircularPath()
     }
         
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        //createCircularPath()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
         createCircularPath()
     }
     
     func createCircularPath() {
+        layer.sublayers?.forEach { $0.removeFromSuperlayer() } // Clear existing layers
         // created circularPath for circleLayer and progressLayer
-        let circularPath = UIBezierPath(arcCenter: CGPoint(x: frame.size.width / 2.0, y: frame.size.height / 2.0), radius: 100, startAngle: startPoint, endAngle: endPoint, clockwise: true)
+        // let circularPath = UIBezierPath(arcCenter: CGPoint(x: frame.size.width / 2.0, y: frame.size.height / 2.0), radius: 100, startAngle: startPoint, endAngle: endPoint, clockwise: true)
+        let circularPath = UIBezierPath(arcCenter: CGPoint(x: bounds.size.width / 2.0, y: bounds.size.height / 2.0), radius: 100, startAngle: startPoint, endAngle: endPoint, clockwise: true)
+
         // circleLayer path defined to circularPath
         circleLayer.path = circularPath.cgPath
         // ui edits

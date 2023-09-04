@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-import FirebaseAuth
+// import FirebaseAuth
 
 class ProfileVC: UIViewController {
     
@@ -45,7 +45,7 @@ class ProfileVC: UIViewController {
     private let contentEdgeInset = UIEdgeInsets(top: 120, left: 40, bottom: 30, right: 40)
     
     
-    private let CELLS = ["Preferences", "Statistics", "Update habits"]
+    private let CELLS = ["Preferences", "Update habits"]
     
     // Add button for editing habits list
     
@@ -64,7 +64,8 @@ class ProfileVC: UIViewController {
         
         // CALayer does not use constraints
         busynessIndexView = CircularProgressBarView(frame: .zero)
-        busynessIndexView.center = view.center
+        busynessIndexView.translatesAutoresizingMaskIntoConstraints = false
+        // busynessIndexView.center = view.center
         
         var toValue = 0.0
         if let val = Authentication.shared.currentUser!.busynessIndex {
@@ -105,11 +106,15 @@ class ProfileVC: UIViewController {
             
             busynessIndexLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             busynessIndexLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            busynessIndexView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            busynessIndexView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            busynessIndexView.widthAnchor.constraint(equalToConstant: 200),  // Assuming the desired width is 200, adjust accordingly
+            busynessIndexView.heightAnchor.constraint(equalTo: busynessIndexView.widthAnchor),
             
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.heightAnchor.constraint(equalToConstant: 150)
+            tableView.heightAnchor.constraint(equalToConstant: 100)
         ])
         
     }
@@ -119,10 +124,7 @@ class ProfileVC: UIViewController {
     }
     
     @objc func didTapSignOut() {
-        do {
-            Authentication.shared.unlinkCurrentUser()
-            try FirebaseAuth.Auth.auth().signOut()
-        } catch { return }
+        Authentication.shared.signOut()
         
         guard let window = self.view.window else { return }
         
@@ -138,8 +140,6 @@ extension ProfileVC: UITableViewDelegate {
         if indexPath.item == 0 {
             navigationController?.pushViewController(PreferencesVC(), animated: true)
         } else if indexPath.item == 1 {
-            navigationController?.pushViewController(StatisticsVC(), animated: true)
-        } else if indexPath.item == 2 {
             navigationController?.pushViewController(HabitsVC(), animated: true)
         }
     }

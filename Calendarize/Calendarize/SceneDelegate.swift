@@ -21,10 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         // MARK: if you forgot to sign out before some changes
-//        do {
-//            Authentication.shared.unlinkCurrentUser()
-//            try FirebaseAuth.Auth.auth().signOut()
-//        } catch { return }
+        // Authentication.shared.signOut()
         
         // window?.makeKeyAndVisible()
         window?.tintColor = .primary
