@@ -70,7 +70,22 @@ class PreferencesVC: UIViewController {
     
     let bedTimeSelector: UIDatePicker = {
         let dp = UIDatePicker()
-        dp.minuteInterval = 30
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+
+        // Set minimum time (8:00 PM)
+        dateComponents.hour = 20
+        dateComponents.minute = 0
+        let minimumDate = calendar.date(from: dateComponents)
+        dp.minimumDate = minimumDate
+        
+        // Set maximum time (e.g., 12:00 AM)
+        dateComponents.hour = 23
+        dateComponents.minute = 59
+        let maximumDate = calendar.date(from: dateComponents)
+        dp.maximumDate = maximumDate
+        
+        dp.minuteInterval = 1
         dp.datePickerMode = .time
         dp.translatesAutoresizingMaskIntoConstraints = false
         

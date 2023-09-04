@@ -339,6 +339,11 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
 //            if event.calendar == ekCalendar { // Might not be needed
 //                continue
 //            }
+            if event.isAllDay {
+                // Ignore holidays and stuff
+                continue
+            }
+            print(event.startDate.description + event.endDate.description)
             let startIndex = max(0, minutes(from: startDate, to: event.startDate))
             let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
             for i in startIndex..<endIndex {
@@ -531,6 +536,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         taskSchedulingWithDurations(for: currentTasks)
         
         // TODO: (c) Non-current Tasks
+        // Idea: compute average hours per day for each non current task. If hour >= 1 hr, then attempt to schedule that many hours
         
         // DEBUG: Print formatted schedule copy
         var currDate = startDate
@@ -697,6 +703,13 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         if last != nil {
             addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1)
+        }
+        
+        // DEBUG: Print formatted schedule copy
+        currDate = startDate
+        for item in schedule {
+            print("\(currDate.formatted()): \(item.description)")
+            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
         }
         
         // MARK: Dropped habits/tasks alerts
