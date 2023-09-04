@@ -38,7 +38,6 @@ class CircularProgressBarView: UIView {
     func createCircularPath() {
         layer.sublayers?.forEach { $0.removeFromSuperlayer() } // Clear existing layers
         // created circularPath for circleLayer and progressLayer
-        // let circularPath = UIBezierPath(arcCenter: CGPoint(x: frame.size.width / 2.0, y: frame.size.height / 2.0), radius: 100, startAngle: startPoint, endAngle: endPoint, clockwise: true)
         let circularPath = UIBezierPath(arcCenter: CGPoint(x: bounds.size.width / 2.0, y: bounds.size.height / 2.0), radius: 100, startAngle: startPoint, endAngle: endPoint, clockwise: true)
 
         // circleLayer path defined to circularPath
@@ -58,12 +57,24 @@ class CircularProgressBarView: UIView {
         progressLayer.lineCap = .round
         progressLayer.lineWidth = 15.0
         progressLayer.strokeEnd = 0
-        progressLayer.strokeColor = UIColor.primary.cgColor
+        // progressLayer.strokeColor = UIColor.primary.cgColor
         // added progressLayer to layer
         layer.addSublayer(progressLayer)
     }
     
     func progressAnimation(duration: TimeInterval, toValue: Double) {
+        print(toValue)
+        // Update stroke color based on toValue
+        if toValue > 0.9 {
+            progressLayer.strokeColor = UIColor.overworkedColor?.cgColor
+        } else if toValue > 0.75 {
+            progressLayer.strokeColor = UIColor.busyColor?.cgColor
+        } else if toValue > 0.6 {
+            progressLayer.strokeColor = UIColor.balancedColor?.cgColor
+        } else {
+            progressLayer.strokeColor = UIColor.relaxedColor?.cgColor
+        }
+
         // created circularProgressAnimation with keyPath
         let circularProgressAnimation = CABasicAnimation(keyPath: "strokeEnd")
         // set the end time

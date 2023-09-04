@@ -749,7 +749,12 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
         }
         let temp = Double(freeCount) / Double(awakeCount)
-        let workloadIndex = (temp * 100).rounded() / 100
+        let workloadIndex = 100 - Int((temp * 100).rounded())
+        
+        let currentUser = Authentication.shared.currentUser!
+        currentUser.busynessIndex = workloadIndex
+        Database.shared.updateUser(currentUser, nil)
+        return
         
         
     }

@@ -28,6 +28,14 @@ extension UIColor {
     
     public static let busynessIndexBackgroundColor = UIColor(hex: "#f0f0f0")!
     
+    public static let overworkedColor = UIColor(hex: "#B3ABCF")
+    
+    public static let busyColor = UIColor(hex: "#DFC0E0")
+    
+    public static let balancedColor = UIColor(hex: "#CDEBCC")
+    
+    public static let relaxedColor = UIColor(hex: "#F7F3CB")
+    
     public static let background = UIColor.white
 }
 

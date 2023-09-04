@@ -65,7 +65,6 @@ class ProfileVC: UIViewController {
         // CALayer does not use constraints
         busynessIndexView = CircularProgressBarView(frame: .zero)
         busynessIndexView.translatesAutoresizingMaskIntoConstraints = false
-        // busynessIndexView.center = view.center
         
         var toValue = 0.0
         if let val = Authentication.shared.currentUser!.busynessIndex {
