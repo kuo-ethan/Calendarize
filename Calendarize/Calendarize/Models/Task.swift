@@ -21,6 +21,7 @@ class Task: Event, Codable, Identifiable, CustomStringConvertible {
         self.deadline = deadline
         
         self.isPriority = false
+        self.isNoncurrent = false
     }
     
     var name: String
@@ -31,6 +32,8 @@ class Task: Event, Codable, Identifiable, CustomStringConvertible {
     var deadline: Date
     
     var isPriority: Bool
+    
+    var isNoncurrent: Bool
     
     func toString() -> String {
         return "\(name) takes \(timeTicks) timeticks"

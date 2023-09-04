@@ -343,7 +343,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // Ignore holidays and stuff
                 continue
             }
-            print(event.startDate.description + event.endDate.description)
             let startIndex = max(0, minutes(from: startDate, to: event.startDate))
             let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
             for i in startIndex..<endIndex {
@@ -499,7 +498,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             
             // Alert user of which tasks were dropped
             for i in 0..<N {
-                if !optimalTaskIndices.contains(i) {
+                if !optimalTaskIndices.contains(i) && !sortedTasks[i].isNoncurrent {
                     dropped.append(sortedTasks[i])
                 }
             }
@@ -535,15 +534,24 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         taskSchedulingWithDurations(for: currentTasks)
         
-        // TODO: (c) Non-current Tasks
+        // MARK: (c) Non-current Tasks
         // Idea: compute average hours per day for each non current task. If hour >= 1 hr, then attempt to schedule that many hours
-        
-        // DEBUG: Print formatted schedule copy
-        var currDate = startDate
-        for item in scheduleMutable {
-            print("\(currDate.formatted()): \(item.description)")
-            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
+        let noncurrentTasks = user.regularTasks.filter { task in
+            return endDate.compare(task.deadline) == .orderedAscending
         }
+        
+        var dummyTasks: [Task] = []
+        for noncurrentTask in noncurrentTasks {
+            let differenceInDays = Int(ceil(noncurrentTask.deadline.timeIntervalSince(startDate) / 3600 / 24))
+            
+            let avgTimeTicksPerDay = noncurrentTask.timeTicks / differenceInDays
+            let dummyTask = Task(name: noncurrentTask.name, timeTicks: avgTimeTicksPerDay, deadline: endDate)
+            dummyTask.isNoncurrent = true
+            dummyTasks.append(dummyTask)
+            print("\(dummyTask.name) scheduled for \(dummyTask.timeTicks) time ticks")
+        }
+        taskSchedulingWithDurations(for: dummyTasks)
+        
         
         // MARK: Randomization
         // Given a schedule array, 'randomize' it by moving added events early and probabilistically, one by one.
@@ -601,7 +609,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     }
                     i += 5
                 }
-                print("Valid indices for \(habit.name): \(validIndices)")
             } else if let task = event as? Task {
                 item = MinuteItem(title: task.name, pointer: task)
                 duration = task.timeTicks * 30
@@ -706,7 +713,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         }
         
         // DEBUG: Print formatted schedule copy
-        currDate = startDate
+        var currDate = startDate
         for item in schedule {
             print("\(currDate.formatted()): \(item.description)")
             currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
