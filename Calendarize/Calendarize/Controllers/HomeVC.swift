@@ -318,7 +318,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let wakeUpDate = calendar.date(bySettingHour: wakeUpTime.hour, minute: wakeUpTime.minutes, second: 0, of: calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!)!
         
         // Sleep from tonight to tomorrow morning
-        let bedTimeIndex = minutes(from: startDate, to: bedTimeDate)
+        let bedTimeIndex = max(0, minutes(from: startDate, to: bedTimeDate))
         let wakeUpIndex = minutes(from: startDate, to: wakeUpDate)
         for i in bedTimeIndex..<wakeUpIndex {
             schedule[i] = ASLEEP
