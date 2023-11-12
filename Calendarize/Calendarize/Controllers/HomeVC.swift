@@ -11,13 +11,22 @@ import EventKit
 import EventKitUI
 import NotificationBannerSwift
 
-final class HomeVC: DayViewController, EKEventEditViewDelegate {
+/// The home page of the app. Displays local calendar view.
+final class HomeVC: DayViewController {
     
     private var eventStore = EKEventStore()
     
-    static var shared: HomeVC!
+    static var shared: HomeVC! // Singleton object is maintained
     
     private var bannerQueue = NotificationBannerQueue(maxBannersOnScreenSimultaneously: 3)
+    
+    var schedule: [MinuteItem]! // In-memory representation of the schedule (an array indexed by the minute).
+    
+    var dropped: [CalendarizeEvent]! // Events that were dropped in the current schedule
+    
+    var startDate: Date!
+    
+    var endDate: Date!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,19 +37,16 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         let refreshButton = UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), style: .plain, target: self, action: #selector(didTapRefresh))
         navigationItem.leftBarButtonItem = refreshButton
         
-        // The app must have access to the user's calendar to show the events on the timeline
+        // The app must have access to the user's calendar. The app will remain unresponsive until access granted.
         requestAccessToCalendar()
         
-        // Subscribe to notifications to reload the UI when
-        subscribeToNotifications()
+        // Subscribe to notifications to reload the calendar UI whenever event store changes
+        //subscribeToNotifications()
         
         // Consecutive calendar events should stack
         var calendarStyle = CalendarStyle()
         calendarStyle.timeline.eventGap = 2.0
         updateStyle(calendarStyle)
-        
-        // Set calendarize calendar
-        // setCalendarizeCalendar()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -52,36 +58,74 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     private func requestAccessToCalendar() {
         // Request access to the events
         if #available(iOS 17.0, *) {
-            print("here")
             eventStore.requestFullAccessToEvents { [weak self] granted, error in
                 if granted {
-                    print("granted")
-                    DispatchQueue.main.async {
-                        guard let self = self else { return }
-                        self.initializeStore()
-                        self.subscribeToNotifications()
-                        self.reloadData()
-                    }
+                    self?.handleCalendarAccessGranted()
                 } else {
-                    print(error?.localizedDescription)
+                    self?.handleCalendarAccessDenied(error)
                 }
             }
         } else {
             // Fallback on earlier versions
             eventStore.requestAccess(to: .event) { [weak self] granted, error in
-                // Handle the response to the request.
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    self.initializeStore()
-                    self.subscribeToNotifications()
-                    self.reloadData()
+                if granted {
+                    self?.handleCalendarAccessGranted()
+                } else {
+                    self?.handleCalendarAccessDenied(error)
                 }
             }
         }
 
     }
     
+    private func handleCalendarAccessGranted() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.initializeStore()
+            self.subscribeToNotifications()
+            self.reloadData()
+        }
+    }
+    
+    private func handleCalendarAccessDenied(_ error: Error?) {
+        print(error?.localizedDescription ?? "Calendar access denied") // For debugging
+        // Show an alert to the user explaining why the access is needed
+        let alert = UIAlertController(title: "Calendar Access Required",
+                                      message: "This app requires permission to read and write to your Apple Calendar. Please enable Full Access in the Settings app.",
+                                      preferredStyle: .alert)
+
+        // Add an action that opens the app settings
+        alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString),
+                  UIApplication.shared.canOpenURL(settingsUrl) else {
+                return
+            }
+
+            UIApplication.shared.open(settingsUrl)
+        })
+
+        // Add a cancel action
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            guard let self = self, let window = self.view.window else { return }
+            let overlayView = self.createGrayOverlayView()
+            window.addSubview(overlayView)
+        })
+
+        // Present the alert
+        DispatchQueue.main.async {
+            self.present(alert, animated: true)
+        }
+    }
+    
+    private func createGrayOverlayView() -> UIView {
+        let overlayView = UIView(frame: UIScreen.main.bounds)
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5) // Semi-transparent
+        overlayView.isUserInteractionEnabled = true // To block touch events
+        return overlayView
+    }
+    
     private func subscribeToNotifications() {
+        print("subscribed to notifications")
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(storeChanged(_:)),
                                                name: .EKEventStoreChanged,
@@ -96,49 +140,39 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         reloadData()
     }
     
-    // MARK: - DayViewDataSource
-    
-    // This is the `DayViewDataSource` method that the client app has to implement in order to display events with CalendarKit
+    // MARK: DayViewDataSource
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
         // The `date` always has it's Time components set to 00:00:00 of the day requested
         let startDate = date
         var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
-        // By adding one full `day` to the `startDate`, we're getting to the 00:00:00 of the *next* day
         let endDate = calendar.date(byAdding: oneDayComponents, to: startDate)!
         
-        // Get events from ALL calendars (including "Calendarize" if it exists!)
+        // Get the day's events across all calendars (including "Calendarize" if exists)
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
-        
         let eventKitEvents = eventStore.events(matching: predicate)
-        
         let calendarKitEvents = eventKitEvents.map(EKWrapper.init)
         
         return calendarKitEvents
     
     }
     
-    // MARK: - DayViewDelegate
-    
-    // MARK: Event Selection
-    
+    // MARK: DayViewDelegate
     override func dayViewDidSelectEventView(_ eventView: EventView) {
-        guard let ckEvent = eventView.descriptor as? EKWrapper else {
+        guard let event = eventView.descriptor as? EKWrapper else {
             return
         }
-        presentDetailViewForEvent(ckEvent.ekEvent)
+        presentDetailViewForEvent(event.ekEvent)
     }
     
     private func presentDetailViewForEvent(_ ekEvent: EKEvent) {
         let eventController = EKEventViewController()
         eventController.event = ekEvent
+        eventController.delegate = self
         eventController.allowsCalendarPreview = true
         eventController.allowsEditing = true
-        navigationController?.pushViewController(eventController,
-                                                 animated: true)
+        navigationController?.pushViewController(eventController, animated: true)
     }
-    
-    // MARK: Event Editing
     
     override func dayView(dayView: DayView, didLongPressTimelineAt date: Date) {
         // Cancel editing current event and start creating a new one
@@ -149,7 +183,7 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private func createNewEvent(at date: Date) -> EKWrapper {
         let newEKEvent = EKEvent(eventStore: eventStore)
-        newEKEvent.calendar = eventStore.defaultCalendarForNewEvents
+        newEKEvent.calendar = eventStore.defaultCalendarForNewEvents // TODO: Handle nil default calendar
         
         var components = DateComponents()
         components.hour = 1
@@ -193,7 +227,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         reloadData()
     }
     
-    
     private func presentEditingViewForEvent(_ ekEvent: EKEvent) {
         let eventEditViewController = EKEventEditViewController()
         eventEditViewController.event = ekEvent
@@ -211,132 +244,51 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
     
     
-    func eventEditViewController(_ controller: EKEventEditViewController, didCompleteWith action: EKEventEditViewAction) {
-        endEventEditing()
-        reloadData()
-        controller.dismiss(animated: true, completion: nil)
-    }
-    
     @objc private func didTapProfile() {
         navigationController?.pushViewController(ProfileVC(), animated: true)
     }
     
-    /*
-     User wants to generate a new schedule.
-     */
     @objc private func didTapRefresh() {
         let currentUser = Authentication.shared.currentUser!
-        calendarize(for: currentUser)
+        calendarize(for: currentUser) // Generate schedule
+        displayScheduleAndAlerts()
+        updateWorkloadIndex()
         reloadData()
     }
     
     // MARK: Algorithm
-    /*
-     Calendarize up to the end of tomorrow. Adds new EKEvents to the 'Calendarize' calendar.
-     */
+    /// Generate random schedule from current time to end of tomorrow that maximizes deadlines met under habit constraints.
     private func calendarize(for user: User) {
-//        // Delete any calendars with the name 'Calendarize'
-//        for calendar in eventStore.calendars(for: .event) {
-//            if calendar.title == "Calendarize" {
-//                try! eventStore.removeCalendar(calendar, commit: true)
-//            }
-//        }
-//
-//        // Make a new empty calendar
-//        let freshCalendar = EKCalendar(for: .event, eventStore: eventStore)
-//        freshCalendar.title = "Calendarize"
-//        freshCalendar.cgColor = UIColor.primary.cgColor
-//        freshCalendar.source = eventStore.defaultCalendarForNewEvents!.source
-//
-//        // Add it to the event store
-//        try! eventStore.saveCalendar(freshCalendar, commit: true)
-        
-        // Assume there's only one (or zero) calendars called 'Calendarize'
-        var ekCalendar: EKCalendar!
-        for cal in eventStore.calendars(for: .event) {
-            if cal.title == "Calendarize" {
-                ekCalendar = cal
-                break
-            }
-        }
-        
-        if ekCalendar == nil {
-             // Make a new empty calendar
-            ekCalendar = EKCalendar(for: .event, eventStore: eventStore)
-            ekCalendar.title = "Calendarize"
-            ekCalendar.cgColor = UIColor.primary.cgColor
-            ekCalendar.source = eventStore.defaultCalendarForNewEvents!.source
-            try! eventStore.saveCalendar(ekCalendar, commit: true)
-        } else {
-            // Clear calendar
-            let predicate = eventStore.predicateForEvents(withStart: calendar.date(byAdding: .year, value: -2, to: Date())!, end: calendar.date(byAdding: .year, value: 2, to: Date())!, calendars: [ekCalendar])
-            for ev in eventStore.events(matching: predicate) {
-                try! eventStore.remove(ev, span: .thisEvent)
-            }
-        }
-        
         
         // Useful constants and setup
-        let startDate = roundUp(Date())
-        var dropped: [Event] = []
+        startDate = roundToNextFiveMinutes(Date())
+        dropped = []
         let calendar = Calendar.current
-        var initialIndexToEvent: Dictionary<Int, Event> = [:]
         let todaysDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday! - 1)
         let tomorrowsDay = DayOfWeek(rawValue: calendar.dateComponents([.weekday], from: startDate).weekday!)
-        
         var TWO_DAY_COMPONENTS = DateComponents()
         TWO_DAY_COMPONENTS.day = 2
         var ONE_DAY_COMPONENTS = DateComponents()
         ONE_DAY_COMPONENTS.day = 1
         var ONE_MIN_COMPONENTS = DateComponents()
         ONE_MIN_COMPONENTS.minute = 1
+        endDate = calendar.startOfDay(for: calendar.date(byAdding: TWO_DAY_COMPONENTS, to: startDate)!)
+        let events = eventStore.events(matching: eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil))
+    
+        schedule = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
         
-        let endDate = calendar.startOfDay(for: calendar.date(byAdding: TWO_DAY_COMPONENTS, to: startDate)!)
-        
-        // Get any EK events that are from now to the end of tomorrow
-        // Note: we must manually ignore events from Calendarize calendar
-        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
-        let events = eventStore.events(matching: predicate)
-        
-        // Represents one minute in the calendar representation, and possibly contains a pointer to a Habit or Task.
-        class MinuteItem: CustomStringConvertible {
-            let title: String
-            let pointer: Event?
-            
-            var description: String {
-                if let pointer {
-                    return "\(title) \(String(describing: pointer))"
-                } else {
-                    return title
-                }
-            }
-            
-            init(title: String, pointer: Event?) {
-                self.title = title
-                self.pointer = pointer
-            }
-
-        }
-        
-        let AVAILABLE = MinuteItem(title: "available", pointer: nil)
-        let ASLEEP = MinuteItem(title: "asleep", pointer: nil)
-        let UNAVAILABLE = MinuteItem(title: "unavailable", pointer: nil)
-        
-        // Create one big array that represents calendar
-        var schedule: [MinuteItem] = Array(repeating: AVAILABLE, count: minutes(from: startDate, to: endDate))
         
         // MARK: Sleep
         let bedTime = user.awakeInterval.endTime
         let wakeUpTime = user.awakeInterval.startTime
         
-        // Create dates for wake up time and bed time
-        // NOTE: assumes bed time falls within today, and wake up time falls within tomorrow.
+        // TODO: Currently we assume bed time falls within today, and wake up time falls within tomorrow.
         let bedTimeDate = calendar.date(bySettingHour: bedTime.hour, minute: bedTime.minutes, second: 0, of: startDate)!
         let wakeUpDate = calendar.date(bySettingHour: wakeUpTime.hour, minute: wakeUpTime.minutes, second: 0, of: calendar.date(byAdding: ONE_DAY_COMPONENTS, to: startDate)!)!
         
         // Sleep from tonight to tomorrow morning
-        let bedTimeIndex = max(0, minutes(from: startDate, to: bedTimeDate))
-        let wakeUpIndex = minutes(from: startDate, to: wakeUpDate)
+        let bedTimeIndex = index(for: bedTimeDate)
+        let wakeUpIndex = index(for: wakeUpDate)
         for i in bedTimeIndex..<wakeUpIndex {
             schedule[i] = ASLEEP
         }
@@ -351,28 +303,26 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             schedule[i] = ASLEEP
         }
         
-        // MARK: Apple Calendar Events
+        
+        // MARK: Events
         for event in events {
-//            if event.calendar == ekCalendar { // Might not be needed
-//                continue
-//            }
             if event.isAllDay {
-                // Ignore holidays and stuff
+                // Ignore all day events like holidays
                 continue
             }
-            let startIndex = max(0, minutes(from: startDate, to: event.startDate))
-            let endIndex = min(schedule.count, minutes(from: startDate, to: event.endDate))
+            let startIndex = index(for: event.startDate)
+            let endIndex = index(for: event.endDate)
             for i in startIndex..<endIndex {
                 schedule[i] = UNAVAILABLE
             }
         }
         
         // MARK: Habits
-        // Sunday = 0, Monday = 1, ...
-        var scheduleMutable = schedule // Only to be used for task scheduling
+        var startIndices: Dictionary<Int, CalendarizeEvent> = [:] // Used in randomization algorithm
+        var deterministicSchedule: [MinuteItem] = schedule // An optimal schedule without randomization
         for type in user.habits.keys {
             for habit in user.habits[type]! {
-                // Create a reference date for the start of the habit's  date
+                // Assert habits inside today or tomorrow and store start of that day
                 var referenceDateStart: Date!
                 if habit.dayOfWeek == todaysDay {
                     referenceDateStart = calendar.startOfDay(for: startDate)
@@ -382,56 +332,44 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     continue
                 }
                 
-                // Get dates for the start and end of habit. Note that end date is an EXCLUSIVE upper bound.
+                // Get truncated indices for the start and end of habit. End date is an EXCLUSIVE upper bound.
                 let startTime = habit.dayInterval.startTime
                 let endTime = habit.dayInterval.endTime
                 let habitStartDate = calendar.date(byAdding: .minute, value: startTime.hour * 60 + startTime.minutes, to: referenceDateStart)!
                 let habitEndDate = calendar.date(byAdding: .minute, value: endTime.hour * 60 + endTime.minutes, to: referenceDateStart)!
+                let startIndex = index(for: habitStartDate)
+                let endIndex = index(for: habitEndDate)
                 
-                // Add the habit into the array
-                let startIndex = max(0, minutes(from: startDate, to: habitStartDate))
-                let endIndex = minutes(from: startDate, to: habitEndDate)
+                // Habit window of opportunity has already passed
+                if endIndex == 0 { continue }
                 
-                // Check that this habit's interval hasn't already passed
-                if 0 >= endIndex { continue }
-                
-                // Now attempt to schedule the habit continuously and as late as possible
+                // Attempt to backload
                 var i = endIndex - 1
                 var streak = 0
                 var habitScheduled = false
                 while !habitScheduled && i >= startIndex {
-                    if scheduleMutable[i] === AVAILABLE {
-                        streak += 1
-                    } else {
-                        streak = 0
-                    }
-                    
-                    // Found continuous period where habit can be completed
+                    if deterministicSchedule[i] === AVAILABLE { streak += 1 } 
+                    else { streak = 0 }
                     if streak == habit.minutes {
-                        // Store this information by storing start index and the habit instance
                         habitScheduled = true
-                        initialIndexToEvent[i] = habit
-                        
-                        // Add to schedule copy (for Task scheduling algorithm)
+                        startIndices[i] = habit
                         let habitItem = MinuteItem(title: "habit", pointer: habit)
                         for j in 0..<streak {
-                            scheduleMutable[i + j] = habitItem
+                            deterministicSchedule[i + j] = habitItem
                         }
                     }
                     i -= 1
                 }
                 if !habitScheduled {
-                    // This habit was not schedulable
+                    // This habit is impossible to complete
                     dropped.append(habit)
                 }
             }
         }
         
         // MARK: Tasks
-        
-        /*
-         Given tasks, add the tasks to the (copy) schedule such that the maximum number of deadlines are met. Adds to the initialIndicesToEvent dictionary for later usage.
-         */
+        /// Deterministically schedules tasks such that the maximum number of deadlines are met
+        /// Note that task deadlines are an exclusive upper bound.
         func taskSchedulingWithDurations(for tasks: [Task]) {
             let sortedTasks = tasks.sorted { a, b in
                 return a.deadline.compare(b.deadline) == .orderedAscending
@@ -443,18 +381,15 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
             let d_N = minutes(from: startDate, to: sortedTasks.last!.deadline)
             
-            // Create a cache for memoization
+            // Memoization cache
             struct Pair: Hashable {
                 let i: Int
                 let j: Int
             }
-            
             var cache: Dictionary<Pair, [(Int, Int)]> = [:]
             
-            /*
-             Returns the indices of tasks for the optimal (maximum task completion) scheduling of the first i tasks into the first j minutes, along with the starting index they are to be scheduled at.
-             This is top-down dynamic programming.
-             */
+            /// A top-down dynamic programming algorithm. Finds optimal scheduling of the first 'i' tasks in the first 'j' minutes.
+            /// - Returns: a list containing the task index and the starting index they are to be scheduled at
             func subproblem(i: Int, j: Int) -> [(Int, Int)] {
                 // Base case
                 if i == 0 {
@@ -470,20 +405,22 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 // With the last task
                 let last_task = sortedTasks[i-1]
                 var with_last_task: [(Int, Int)] = []
-                var minutesLeft = sortedTasks[i-1].timeTicks * 30
+                var minutesLeft = last_task.timeTicks * 30
                 
                 // Compute how many minutes it takes to backload the last task
                 var index = min(j, minutes(from: startDate, to: last_task.deadline)) - 1
-                // Fast foward to first AVAILABLE index
-                while index > 0 && scheduleMutable[index] !== AVAILABLE {
+                
+                // Fast foward to first available index
+                while index > 0 && deterministicSchedule[index] !== AVAILABLE {
                     index -= 1
                 }
+                
                 while index >= 0 {
-                    if scheduleMutable[index] === AVAILABLE {
+                    if deterministicSchedule[index] === AVAILABLE {
                         minutesLeft -= 1
                     }
                     if minutesLeft == 0 {
-                        // Possible to schedule the last task, starting from INDEX.
+                        // Schedule the last task from index
                         if cache[Pair(i: i-1, j: index)] == nil {
                             cache[Pair(i: i-1, j: index)] = subproblem(i: i-1, j: index)
                         }
@@ -499,38 +436,38 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 } else if without_last_task.count < with_last_task.count{
                     cache[Pair(i: i, j: j)] = with_last_task
                 } else {
-                    // If either option has the same number of tasks, then take the more urgent one
+                    // If tie, then take the schedule without last task, since it is least urgent.
                     cache[Pair(i: i, j: j)] = without_last_task
                 }
                 return cache[Pair(i: i, j: j)]!
             }
             
             // Run the task scheduling algorithm
-            let optimalTaskInfo = subproblem(i: N, j: d_N)
+            let res = subproblem(i: N, j: d_N)
             
             var optimalTaskIndices: [Int] = []
-            for i in 0..<optimalTaskInfo.count {
-                optimalTaskIndices.append(optimalTaskInfo[i].0)
+            for i in 0..<res.count {
+                optimalTaskIndices.append(res[i].0)
             }
             
             // Alert user of which tasks were dropped
             for i in 0..<N {
-                if !optimalTaskIndices.contains(i) && !sortedTasks[i].isNoncurrent {
+                if !optimalTaskIndices.contains(i) && !(sortedTasks[i].type == .noncurrent) {
                     dropped.append(sortedTasks[i])
                 }
             }
             
-            // Add tasks to schedule copy. Save the scheduled tasks and where they go separately
-            for (taskIndex, scheduleIndex) in optimalTaskInfo {
+            // Write each task into the deterministic schedule.
+            for (taskIndex, scheduleIndex) in res {
                 let currTask = sortedTasks[taskIndex]
-                initialIndexToEvent[scheduleIndex] = currTask
+                startIndices[scheduleIndex] = currTask
                 
                 var i = scheduleIndex
                 var currMinutes = (currTask.timeTicks * 30)
                 let currTaskItem = MinuteItem(title: "task", pointer: currTask)
                 while currMinutes > 0 {
-                    if scheduleMutable[i] === AVAILABLE {
-                        scheduleMutable[i] = currTaskItem
+                    if deterministicSchedule[i] === AVAILABLE {
+                        deterministicSchedule[i] = currTaskItem
                         currMinutes -= 1
                     }
                     i += 1
@@ -545,16 +482,16 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         taskSchedulingWithDurations(for: priorityTasks)
         
         // MARK: (b) Current Tasks
-        // Current tasks have deadline between startDate and endDate (which includes midnight)
+        // Current tasks have startDate < deadline <= endDate.
         let currentTasks = user.regularTasks.filter { task in
-            return startDate.compare(task.deadline) == .orderedAscending && (task.deadline.compare(endDate) == .orderedAscending || task.deadline.compare(endDate) == .orderedSame)
+            startDate < task.deadline && task.deadline <= endDate
         }
         taskSchedulingWithDurations(for: currentTasks)
         
         // MARK: (c) Non-current Tasks
-        // Idea: compute average hours per day for each non current task. If hour >= 1 hr, then attempt to schedule that many hours
+        // A non-current task has a deadline after our current window. Compute how many hours per day it takes to complete that task, and if >= 1 hr, then try to schedule that many hours.
         let noncurrentTasks = user.regularTasks.filter { task in
-            return endDate.compare(task.deadline) == .orderedAscending
+            return endDate < task.deadline
         }
         
         var dummyTasks: [Task] = []
@@ -563,25 +500,25 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             
             let avgTimeTicksPerDay = noncurrentTask.timeTicks / differenceInDays
             let dummyTask = Task(name: noncurrentTask.name, timeTicks: avgTimeTicksPerDay, deadline: endDate)
-            dummyTask.isNoncurrent = true
+            dummyTask.type = .noncurrent
             dummyTasks.append(dummyTask)
-            print("\(dummyTask.name) scheduled for \(dummyTask.timeTicks) time ticks")
         }
         taskSchedulingWithDurations(for: dummyTasks)
         
         
         // MARK: Randomization
-        // Given a schedule array, 'randomize' it by moving added events early and probabilistically, one by one.
-            
-        let sortedInitialIndices = initialIndexToEvent.keys.sorted()
+        let sortedInitialIndices = startIndices.keys.sorted()
             
         /*
          Randomly schedule the event somewhere before or at INDEX. The new index will be uniformly chosen at random from all indices with minimum fragmentation. Only indicies that are a multiple of 5 minutes will be considered as possible indices.
          */
-        func randomlySchedule(event: Event, before index: Int) {
-            /*
-             Counts the number of fragments created when scheduling some minutes starting at index. Assumes that schedule[i] === AVAILABLE and that the minutes are schedulable.
-             */
+        /// Randomize a deterministic optimal schedule by iterating through each event sequentially and moving them randomly to an earlier time.
+        /// This function takes a specific event and finds all start indices that minimize fragmentation of the event. Then, it randomly selects an index and schedules the task.
+        /// The motivation for minimal fragmentation is that a task is best completed with minimal interruptions.
+        func randomlySchedule(event: CalendarizeEvent, before index: Int) {
+            
+            /// Counts the number of fragments created when scheduling some minutes starting at index. 
+            /// Assumes schedule[i] === AVAILABLE and that the minutes are schedulable.
             func countFragments(at index: Int, forMinutes minutes: Int) -> Int {
                 var fragments = 1
                 var i = index+1
@@ -597,29 +534,27 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                     }
                     i += 1
                 }
-                
                 return fragments
             }
             
             // Set up
-            var validIndices: [Int] = [index] // OPT index as an option might be the only option
+            var validIndices: [Int] = [index]
             var duration: Int // How many minutes need to be scheduled from that index
             var item: MinuteItem!
             
-            // Now get all valid indices for habit or task
             if let habit = event as? Habit {
+                // A valid habit scheduling has exactly one fragment.
                 item = MinuteItem(title: habit.name, pointer: habit)
                 duration = habit.minutes
                 let earliestTime = habit.dayInterval.startTime
-                let earliestDate = roundUp(calendar.date(bySettingHour: earliestTime.hour, minute: earliestTime.minutes, second: 0, of: startDate)!)
-                var earliestIndex = minutes(from: startDate, to: earliestDate)
-                // If the habit is for tomorrow, then add one day to index
+                let earliestDate = roundToNextFiveMinutes(calendar.date(bySettingHour: earliestTime.hour, minute: earliestTime.minutes, second: 0, of: startDate)!)
+                // var earliestIndex = minutes(from: startDate, to: earliestDate)
+                var earliestIndex = self.index(for: earliestDate)
                 if habit.dayOfWeek == tomorrowsDay {
                     earliestIndex += (24 * 60)
                 }
                 
-                // Now consider all possible starting indices (that have minute multiple of 5)
-                var i = max(0, earliestIndex)
+                var i = earliestIndex
                 while i < index {
                     if schedule[i] === AVAILABLE && countFragments(at: i, forMinutes: habit.minutes) == 1 {
                         validIndices.append(i)
@@ -660,44 +595,39 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
             }
 
         }
-            
+        
+        // Randomly shift each event forward in sequential order
         for index in sortedInitialIndices {
-            randomlySchedule(event: initialIndexToEvent[index]!, before: index)
+            randomlySchedule(event: startIndices[index]!, before: index)
+        }
+    }
+    
+    /// Updates UI to show the generated schedule along with any alerts.
+    private func displayScheduleAndAlerts() {
+        
+        // Prepare a fresh Calendarize calendar object.
+        var calendarizeCalendar: EKCalendar!
+        for cal in eventStore.calendars(for: .event) {
+            if cal.title == "Calendarize" {
+                calendarizeCalendar = cal
+                break
+            }
+        }
+        if calendarizeCalendar == nil {
+            calendarizeCalendar = EKCalendar(for: .event, eventStore: eventStore)
+            calendarizeCalendar.title = "Calendarize"
+            calendarizeCalendar.cgColor = UIColor.primary.cgColor
+            calendarizeCalendar.source = eventStore.defaultCalendarForNewEvents!.source // TODO: Handle nil default calendar
+            try! eventStore.saveCalendar(calendarizeCalendar, commit: true)
+        } else {
+            let predicate = eventStore.predicateForEvents(withStart: calendar.date(byAdding: .year, value: -2, to: Date())!, end: calendar.date(byAdding: .year, value: 2, to: Date())!, calendars: [calendarizeCalendar])
+            for ev in eventStore.events(matching: predicate) {
+                try! eventStore.remove(ev, span: .thisEvent)
+            }
         }
         
-        // MARK: Create EKEvents and add to 'Calendarize' calendar.
-        /*
-         Returns corresponding EKEvent for an AddedEvent given its start and end indices within the schedule array, inclusive.
-         */
-        func addCalendarizeEvent(for eventItem: Event, fromIndex i: Int, toIndex j: Int) {
-            // Get fromDate and toDate
-            var offsetComponents = DateComponents()
-            offsetComponents.minute = i
-            let fromDate = calendar.date(byAdding: offsetComponents, to: startDate)!
-            offsetComponents.minute = j
-            let toDate = calendar.date(byAdding: offsetComponents, to: startDate)!
-
-            // Create the EKEvent
-            let newEKEvent = EKEvent(eventStore: eventStore)
-            newEKEvent.calendar = ekCalendar
-            if let habit = eventItem as? Habit {
-                newEKEvent.title = habit.name
-                newEKEvent.startDate = fromDate
-                newEKEvent.endDate = toDate
-            } else {
-                let task = eventItem as! Task
-                newEKEvent.title = task.name
-                newEKEvent.startDate = fromDate
-                newEKEvent.endDate = toDate
-            }
-            do {
-                try eventStore.save(newEKEvent, span: .thisEvent)
-            } catch let error as NSError {
-                print("failed to save event with error : \(error)")
-            }
-        }
-
-        var last: Event?
+        // Update calendar UI with new schedule
+        var last: CalendarizeEvent?
         var start: Int?
         for i in 0..<schedule.count {
             if last == nil {
@@ -712,34 +642,31 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
                 if let curr = schedule[i].pointer {
                     if curr !== last {
                         // The end of a run, and moving onto a new instance
-                        addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1)
+                        addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1, on: calendarizeCalendar)
                         last = curr
                         start = i
                     }
 
                 } else {
                     // The end of a run
-                    addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1)
+                    addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: i-1, on: calendarizeCalendar)
                     last = nil
                     start = nil
                 }
             }
         }
         if last != nil {
-            addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1)
+            addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1, on: calendarizeCalendar)
         }
         
-        // DEBUG: Print formatted schedule copy
-        var currDate = startDate
-        for item in schedule {
-            print("\(currDate.formatted()): \(item.description)")
-            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
-        }
+//        // DEBUG: Print formatted schedule copy
+//        var currDate: Date = startDate
+//        for item in schedule {
+//            print("\(currDate.formatted()): \(item.description)")
+//            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
+//        }
         
-        
-        
-        
-        // MARK: Dropped habits/tasks alerts
+        // Display alerts for dropped tasks and habits
         for droppedEvent in dropped {
             if let habit = droppedEvent as? Habit {
                 let message = "Impossible to schedule \(habit.name) from \(habit.dayInterval.startTime.toString()) to \(habit.dayInterval.endTime.toString())"
@@ -752,9 +679,39 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         if dropped.count == 0 {
             showErrorBanner(withTitle: "Success!", subtitle: "No habits or tasks were dropped")
         }
-        
-        // MARK: Workload index
-        // This is the percent of your day that is free time!
+    }
+    
+    /// Creates EKEvent for a calendarize event given its start and end indices within the schedule array, inclusive.
+    private func addCalendarizeEvent(for eventItem: CalendarizeEvent, fromIndex i: Int, toIndex j: Int, on ekCalendar: EKCalendar) {
+        // Get fromDate and toDate
+        var offsetComponents = DateComponents()
+        offsetComponents.minute = i
+        let fromDate = calendar.date(byAdding: offsetComponents, to: startDate)!
+        offsetComponents.minute = j
+        let toDate = calendar.date(byAdding: offsetComponents, to: startDate)!
+
+        // Create the EKEvent
+        let newEKEvent = EKEvent(eventStore: eventStore)
+        newEKEvent.calendar = ekCalendar
+        if let habit = eventItem as? Habit {
+            newEKEvent.title = habit.name
+            newEKEvent.startDate = fromDate
+            newEKEvent.endDate = toDate
+        } else {
+            let task = eventItem as! Task
+            newEKEvent.title = task.name
+            newEKEvent.startDate = fromDate
+            newEKEvent.endDate = toDate
+        }
+        do {
+            try eventStore.save(newEKEvent, span: .thisEvent)
+        } catch let error as NSError {
+            print("failed to save event with error : \(error)")
+        }
+    }
+    
+    /// Updates work load index value given the current schedule.
+    private func updateWorkloadIndex() {
         var freeCount = 0
         var awakeCount = 0
         for item in schedule {
@@ -772,16 +729,11 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
         currentUser.busynessIndex = workloadIndex
         Database.shared.updateUser(currentUser, nil)
         return
-        
-        
     }
-        
     
     
 
-    
-    // Rounds date object to the next five munutes
-    private func roundUp(_ date: Date) -> Date {
+    private func roundToNextFiveMinutes(_ date: Date) -> Date {
         let seconds: TimeInterval = ceil(date.timeIntervalSinceReferenceDate/300.0)*300.0
         return Date(timeIntervalSinceReferenceDate: seconds)
     }
@@ -796,6 +748,11 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     private func minutes(from startDate: Date, to endDate: Date) -> Int {
         let diffSeconds = Int(endDate.timeIntervalSince1970 - startDate.timeIntervalSince1970)
         return diffSeconds / 60
+    }
+    
+    // Given any date, returns its corresponding index in the schedule
+    private func index(for date: Date) -> Int {
+        return min(max(0, minutes(from: startDate, to: date)), schedule.count)
     }
     
     
@@ -821,3 +778,19 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     }
 }
 
+// MARK: Extensions
+extension HomeVC: EKEventEditViewDelegate {
+    func eventEditViewController(_ controller: EKEventEditViewController, didCompleteWith action: EKEventEditViewAction) {
+        endEventEditing()
+        reloadData()
+        controller.dismiss(animated: true, completion: nil)
+    }
+}
+
+extension HomeVC: EKEventViewDelegate {
+    func eventViewController(_ controller: EKEventViewController, didCompleteWith action: EKEventViewAction) {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    
+}

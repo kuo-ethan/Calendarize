@@ -61,7 +61,7 @@ class TaskEditorVC: UIViewController {
         super.init(nibName: nil, bundle: nil)
         
         titleTextField.textField.text = task.name
-        prioritySwitch.isOn = task.isPriority
+        prioritySwitch.isOn = task.type == .priority
         deadlinePicker.setDate(task.deadline, animated: true)
     }
     
@@ -151,23 +151,27 @@ class TaskEditorVC: UIViewController {
         guard let name = titleTextField.text else { return }
         if name == "" { return }
         
-        let prevIsPriority = currentTask.isPriority
-        
         currentTask.name = name
         currentTask.deadline = deadlinePicker.date
-        currentTask.isPriority = prioritySwitch.isOn
+        
+        let prevType = currentTask.type
+        if prioritySwitch.isOn {
+            currentTask.type = .priority
+        } else {
+            currentTask.type = .current
+        }
         
         if isNewTask {
             if currentTask.timeTicks == 0 {
                 return
-            } else if currentTask.isPriority {
+            } else if currentTask.type == .priority {
                 currentUser.priorityTasks.append(currentTask)
             } else {
                 currentUser.regularTasks.append(currentTask)
             }
         } else {
             if currentTask.timeTicks == 0 {
-                if prevIsPriority {
+                if prevType == .priority{
                     let index = currentUser.priorityTasks.firstIndex { task in
                         task.id == currentTask.id
                     }
@@ -178,8 +182,8 @@ class TaskEditorVC: UIViewController {
                     }
                     currentUser.regularTasks.remove(at: index!)
                 }
-            } else if prevIsPriority != currentTask.isPriority {
-                if prevIsPriority {
+            } else if prevType != currentTask.type {
+                if prevType == .priority {
                     // move to regular tasks
                     let index = currentUser.priorityTasks.firstIndex { task in
                         task.id == currentTask.id

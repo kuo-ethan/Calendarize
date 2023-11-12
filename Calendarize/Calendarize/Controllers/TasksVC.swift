@@ -148,7 +148,7 @@ class AutoDeleteTimeStepperView: TimeStepperView {
         super.didTapDecrement()
         
         if associatedTask.timeTicks == 0 {
-            if associatedTask.isPriority {
+            if associatedTask.type == .priority {
                 let index = Authentication.shared.currentUser!.priorityTasks.firstIndex { task in
                     return task.id == associatedTask.id
                 }

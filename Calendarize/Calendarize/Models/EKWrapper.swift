@@ -8,6 +8,7 @@ import UIKit
 import EventKit
 import CalendarKit
 
+/// Enhances the basic event information from EKEvent with additional UI-related properties and methods to facilitate its display and manipulation within a custom calendar interface
 final class EKWrapper: EventDescriptor {
     public var dateInterval: DateInterval {
         get {

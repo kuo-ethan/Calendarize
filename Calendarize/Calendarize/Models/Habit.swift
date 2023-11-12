@@ -15,7 +15,7 @@ enum DayOfWeek: Int, Codable {
     case Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 
-class Habit: Event, Codable, Identifiable, CustomStringConvertible {
+class Habit: CalendarizeEvent, Codable, Identifiable, CustomStringConvertible {
     
     var description: String {
         return "Habit: \(self.name)"

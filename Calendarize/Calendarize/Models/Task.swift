@@ -7,33 +7,33 @@
 
 import Foundation
 
-typealias TimeTicks = Int
+typealias TimeTicks = Int // 30 minute time unit
 
-class Task: Event, Codable, Identifiable, CustomStringConvertible {
-    var description: String {
-        "Task: \(self.name)"
-    }
+enum TaskType: String, Codable {
+    case priority
+    case current
+    case noncurrent
+}
+
+class Task: CalendarizeEvent, Codable, Identifiable, CustomStringConvertible {
+    
+    var description: String { "Task: \(self.name)" } // For debugging
     
     
     init(name: String, timeTicks: TimeTicks, deadline: Date) {
         self.name = name
         self.timeTicks = timeTicks
         self.deadline = deadline
-        
-        self.isPriority = false
-        self.isNoncurrent = false
+        self.type = .current
     }
     
     var name: String
     
-    // 1 time tick = 30 minutes
     var timeTicks: TimeTicks
     
     var deadline: Date
     
-    var isPriority: Bool
-    
-    var isNoncurrent: Bool
+    var type: TaskType
     
     func toString() -> String {
         return "\(name) takes \(timeTicks) timeticks"
