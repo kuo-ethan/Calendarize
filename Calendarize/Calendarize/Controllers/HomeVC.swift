@@ -15,8 +15,6 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private var eventStore = EKEventStore()
     
-    // private var calendarizeCalendar: EKCalendar?
-    
     static var shared: HomeVC!
     
     private var bannerQueue = NotificationBannerQueue(maxBannersOnScreenSimultaneously: 3)
@@ -53,15 +51,34 @@ final class HomeVC: DayViewController, EKEventEditViewDelegate {
     
     private func requestAccessToCalendar() {
         // Request access to the events
-        eventStore.requestAccess(to: .event) { [weak self] granted, error in
-            // Handle the response to the request.
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                self.initializeStore()
-                self.subscribeToNotifications()
-                self.reloadData()
+        if #available(iOS 17.0, *) {
+            print("here")
+            eventStore.requestFullAccessToEvents { [weak self] granted, error in
+                if granted {
+                    print("granted")
+                    DispatchQueue.main.async {
+                        guard let self = self else { return }
+                        self.initializeStore()
+                        self.subscribeToNotifications()
+                        self.reloadData()
+                    }
+                } else {
+                    print(error?.localizedDescription)
+                }
+            }
+        } else {
+            // Fallback on earlier versions
+            eventStore.requestAccess(to: .event) { [weak self] granted, error in
+                // Handle the response to the request.
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.initializeStore()
+                    self.subscribeToNotifications()
+                    self.reloadData()
+                }
             }
         }
+
     }
     
     private func subscribeToNotifications() {

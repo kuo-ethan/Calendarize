@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+/// The initial launch screen for a signed in user, which defaults to the Home screen.
 class TabBarVC: UITabBarController {
     
     let wrappedHomeVC: UINavigationController = {
@@ -64,9 +65,8 @@ class TabBarVC: UITabBarController {
         if item == tabBar.items?[0] {
             Database.shared.updateUser(Authentication.shared.currentUser!, nil)
         } else if item == tabBar.items?[1] {
-            TasksVC.shared.tableView.reloadData()
-            wrappedHomeVC.popToRootViewController(animated: false)
-            print("reloaded table view data")
+            TasksVC.shared.tableView.reloadData() // This is blocking/synchronous
+            wrappedHomeVC.popToRootViewController(animated: false) // Switching back to Home displays calendar
         }
     }
 }

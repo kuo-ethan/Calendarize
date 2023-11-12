@@ -34,19 +34,18 @@ struct Time: Codable, Comparable, Equatable {
     let minutes: Int
     
     init(fromString timeString: String) {
-        // timeString is in the form of "10:35 PM"
-        var temp = timeString.components(separatedBy: ":")
-        var hr = Int(temp[0])!
-        temp = temp[1].components(separatedBy: " ")
-        minutes = Int(temp[0])!
-        if hr == 12 {
-            hr = 0
-        }
-        if temp[1] == "PM" {
-            hour = hr + 12
-        } else {
-            hour = hr
-        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a" // "h" for hour, "mm" for minutes, "a" for AM/PM
+        formatter.locale = Locale(identifier: "en_US_POSIX") // to ensure AM/PM is correctly interpreted
+
+        let date = formatter.date(from: timeString)!
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let minutes = calendar.component(.minute, from: date)
+
+        // Assign these values to your instance variables
+        self.hour = hour
+        self.minutes = minutes
     }
     
     init(hour: Int, minutes: Int) {
