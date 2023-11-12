@@ -24,12 +24,9 @@ class Authentication {
         linkUser(withuid: user.uid, completion: nil)
     }
     
-    /* Given a UID, adds a listener to the user's document and updates currentUser */
+    /// Given a UID, adds a listener to the user's document and sets currentUser.
     func linkUser(withuid uid: String, completion: (() -> Void)?) {
-        
-        // calls that closure when that document is updated
         userListener = Database.shared.db.collection("users").document(uid).addSnapshotListener { [weak self] docSnapshot, error in
-            print("snapshot listener triggered")
             guard let document = docSnapshot else {
                 fatalError("ERROR: document with UID \(uid) not found")
             }
@@ -37,13 +34,13 @@ class Authentication {
                 fatalError("ERROR: user from firestore not decodable")
             }
             self?.currentUser = user
-            if let completion = completion { // MARK: ayo? i think this should be outside...
+            if let completion = completion {
                 completion()
             }
         }
     }
     
-    /* Create a new document for a new user, then link the user as above */
+    /// Create a new document for a new user, then link the user as above
     func linkNewUser(withuid uid: String, withData user: User, completion: (() -> Void)?) {
         Database.shared.addUser(uid, user) { error in
             if let _ = error {

@@ -251,9 +251,8 @@ final class HomeVC: DayViewController {
     @objc private func didTapRefresh() {
         let currentUser = Authentication.shared.currentUser!
         calendarize(for: currentUser) // Generate schedule
-        displayScheduleAndAlerts()
-        updateWorkloadIndex()
-        reloadData()
+        displayScheduleAndAlerts() // Update calendar UI
+        updateWorkloadIndex() // Update workload index
     }
     
     // MARK: Algorithm
@@ -659,12 +658,7 @@ final class HomeVC: DayViewController {
             addCalendarizeEvent(for: last!, fromIndex: start!, toIndex: schedule.count-1, on: calendarizeCalendar)
         }
         
-//        // DEBUG: Print formatted schedule copy
-//        var currDate: Date = startDate
-//        for item in schedule {
-//            print("\(currDate.formatted()): \(item.description)")
-//            currDate = calendar.date(byAdding: ONE_MIN_COMPONENTS, to: currDate)!
-//        }
+        reloadData() // Update UI
         
         // Display alerts for dropped tasks and habits
         for droppedEvent in dropped {

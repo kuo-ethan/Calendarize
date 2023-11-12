@@ -16,20 +16,11 @@ class Database {
     let db = Firestore.firestore()
     
     func addUser(_ uid: UserID, _ user: User, _ completion: ((Error?) -> Void)?) {
-        do {
-            try db.collection("users").document(uid).setData(from: user, completion: completion)
-        }
-        catch { }
+        try! db.collection("users").document(uid).setData(from: user, completion: completion)
     }
     
     func updateUser(_ user: User, _ completion: ((Error?) -> Void)?) {
         guard let uid = user.uid else { return }
-        do {
-            print("Setting data")
-            try db.collection("users").document(uid).setData(from: user, completion: completion)
-        }
-        catch {
-            print("ERROR: Failed to set data")
-        }
+        try! db.collection("users").document(uid).setData(from: user, completion: completion)
     }
 }
