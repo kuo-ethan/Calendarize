@@ -16,7 +16,7 @@ Modern day to-do list apps are great, except for when your to-do list grows long
 This app is built programmatically using UIKit and a Firebase backend. The local calendar view uses [CalendarKit](https://github.com/richardtop/CalendarKit), a Swift API developed by Richard Topchii.
 
 # Release/Usage
-`Calendarize` will be published on the Apple app store within the next few months. For now, check out my Demo video below!
+`Calendarize` is not yet published on the App Store. For now, check out my Demo video below!
 
 # Demo
 https://user-images.githubusercontent.com/90064267/235117403-bf048b18-82a1-4224-b7fb-b9c537fbf1dc.mov
